@@ -1,28 +1,37 @@
-import { Request, Response } from "express";
+import { json, Request, Response } from "express";
+import cors from "cors";
 import { rateLimit } from "express-rate-limit";
 import { authMiddleware } from "./auth";
 import { headerMiddleware } from "./headers";
 import { loggingMiddleware } from "./logging";
 import { STATUS_CODES, logResponse } from "../util";
 
-const code = 429;
-const statusMessage = `${code} ${STATUS_CODES[code]}`;
+const RATE_LIMITER_CODE = 429;
+const RATE_LIMITER_STATUS =
+  `${RATE_LIMITER_CODE} ${STATUS_CODES[RATE_LIMITER_CODE]}` as const;
 
 export function getMiddleware() {
-  const limiter = rateLimit({
+  const rateLimiterMiddleware = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 mins
     limit: 100, // 100 requests per 15 mins
     standardHeaders: true,
     legacyHeaders: false,
-    statusCode: code,
+    statusCode: RATE_LIMITER_CODE,
     message: (_req: Request, res: Response) => {
-      logResponse(res, statusMessage);
+      logResponse(res, RATE_LIMITER_STATUS);
       return {
-        [statusMessage]:
+        [RATE_LIMITER_STATUS]:
           "You have sent too many requests recently. Try again later.",
       };
     },
   });
 
-  return [loggingMiddleware, limiter, headerMiddleware, authMiddleware];
+  return [
+    cors(),
+    json(),
+    loggingMiddleware,
+    rateLimiterMiddleware,
+    headerMiddleware,
+    authMiddleware,
+  ];
 }

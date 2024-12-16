@@ -1,6 +1,8 @@
 import { promises as fs, createReadStream } from "fs";
-import { Request, Response } from "express";
+import { Application, Request, Response } from "express";
 import { WhereOptions } from "sequelize";
+import path from "path";
+import dotenv from "dotenv";
 import { getLogger } from "./logger";
 import {
   ModelType,
@@ -20,7 +22,7 @@ const DOWNLOAD_STATUS_MAP = {
   6: DownloadStatus.COMPLETE,
 } as const;
 
-export const STATUS_CODES: { [code: number]: string } = {
+export const STATUS_CODES = {
   200: "OK",
   201: "Created",
   204: "No Content",
@@ -303,7 +305,7 @@ export async function sendFileStream(
     sendError(res, 500, error as Error);
     return;
   }
-  let responseCode = 200;
+  let responseCode: StatusCode = 200;
   const range = req.headers.range;
   let file;
 
@@ -346,4 +348,37 @@ export const serialiseEpisode = (
 export function getTokenSecret(type: "access" | "refresh") {
   const secret = process.env[`JWT_${type.toUpperCase()}_TOKEN_SECRET`];
   return (secret ?? "") as jwt.Secret;
+}
+
+/**
+ * Reads the `.env` file and prepares for server start.
+ * Returns `true` if the server is in development mode, else `false`.
+ */
+export function setupEnvironment() {
+  const DEBUG_MODE = process.env.NODE_ENV === "development";
+  // In production mode, this code is run from /api/v1/dist/index.js
+  // In development mode, it is in /api/v1/index.ts
+  // The env file is in /api/.env, so adjust accordingly
+  const ENV_FILE_PATH = DEBUG_MODE ? "../.env" : "../../.env";
+  const dotEnvPath = path.resolve(__dirname, ENV_FILE_PATH);
+  dotenv.config({ path: dotEnvPath });
+
+  if (DEBUG_MODE) {
+    // Add newline before app output for readability
+    console.log();
+  }
+
+  return DEBUG_MODE;
+}
+
+/** Starts the server on the specified port, and registers a catch-all 404 route. */
+export function startServer(app: Application, port: number) {
+  // Catch-all 404 response for any other route
+  app.all("*", (req, res) =>
+    sendError(res, 404, {
+      message: `The resource at '${req.originalUrl}' was not located.`,
+    })
+  );
+
+  app.listen(port, () => logger.info(`API listening on port ${port}.`));
 }
