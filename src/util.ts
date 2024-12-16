@@ -1,7 +1,7 @@
 import { promises as fs, createReadStream } from "fs";
 import { Application, Request, Response } from "express";
 import { WhereOptions } from "sequelize";
-import path from "path";
+import { dirname, resolve } from "path";
 import dotenv from "dotenv";
 import { getLogger } from "./logger";
 import {
@@ -355,12 +355,18 @@ export function getTokenSecret(type: "access" | "refresh") {
  * Returns `true` if the server is in development mode, else `false`.
  */
 export function setupEnvironment() {
+  const entryPoint = require.main?.filename;
+  if (!entryPoint) {
+    throw new Error("Unable to determine the entry point of the application.");
+  }
+  const appDirectory = dirname(entryPoint);
   const DEBUG_MODE = process.env.NODE_ENV === "development";
   // In production mode, this code is run from /api/v1/dist/index.js
   // In development mode, it is in /api/v1/index.ts
   // The env file is in /api/.env, so adjust accordingly
   const ENV_FILE_PATH = DEBUG_MODE ? "../.env" : "../../.env";
-  const dotEnvPath = path.resolve(__dirname, ENV_FILE_PATH);
+  const dotEnvPath = resolve(appDirectory, ENV_FILE_PATH);
+  console.log(appDirectory, dotEnvPath);
   dotenv.config({ path: dotEnvPath });
 
   if (DEBUG_MODE) {
