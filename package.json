@@ -1,6 +1,6 @@
 {
   "name": "guzek-uk-common",
-  "version": "1.1.3",
+  "version": "1.1.4",
   "description": "A repository of common libraries and utilities for the Guzek UK Website. ",
   "engines": {
     "node": "^22.12.0"
@@ -37,6 +37,9 @@
       "sequelize": [
         "dist/sequelize.d.ts"
       ],
+      "setup": [
+        "dist/setup.d.ts"
+      ],
       "util": [
         "dist/util.d.ts"
       ]
@@ -48,6 +51,7 @@
     "./maths": "./dist/maths.js",
     "./models": "./dist/models.js",
     "./sequelize": "./dist/sequelize.js",
+    "./setup": "./dist/setup.js",
     "./util": "./dist/util.js"
   },
   "files": [
