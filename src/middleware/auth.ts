@@ -22,6 +22,7 @@ const PERMISSIONS = {
       "/liveseries/video", // Stream downloaded LiveSeries episode
       "/liveseries/subtitles", // Fetch episode subtitles
       "/torrents", // Search for torrents using scraper
+      "/.well-known", // JKWS for JWT
     ],
     POST: [
       "/auth/users", // Sign up
