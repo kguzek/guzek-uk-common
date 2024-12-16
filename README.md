@@ -1,8 +1,17 @@
 # Guzek UK Common
 
 A repository of common modules and utilities for the Guzek UK Website, used on the various deployed servers.
+The functionality of these utilities is based around a REST HTTP server, with a heavy focus on CRUD operations.
 
-## Modules
+## Installation
+
+The package is published at the NPM package registry.
+
+```bash
+npm install guzek-uk-common
+```
+
+## Usage
 
 Below is a list of all modules available in this library.
 
@@ -17,23 +26,23 @@ const logger = getLogger(__filename);
 logger.info("Hello, world!");
 ```
 
-## maths
+### maths
 
 Used for Tu Lałem geographic calculations.
 
-## models
+### models
 
 Generic server-wide type definitions.
 
-## sequelize
+### sequelize
 
 Model definitions for the database ORM.
 
-## util
+### util
 
 CRUD functions and general server-related functions.
 
-## middleware
+### middleware
 
 Exports an array factory containing middlewares which should be used on all servers. Usage:
 
@@ -47,7 +56,7 @@ app.use(getMiddleware());
 
 `useMiddleware()` produces an array of the following middlewares, which shouldn't be accessed directly:
 
-### middleware/auth
+#### middleware/auth
 
 Automatic request authentication and authorisation. If the request passes, this middleware adds the `user` object to the request object, to be used in later request handlers. Example:
 
@@ -62,10 +71,10 @@ app.get("/my-uuid", (req, res) => {
 });
 ```
 
-### middleware/headers
+#### middleware/headers
 
 Adds `pragma` headers to all responses for proper caching.
 
-### middleware/logging
+#### middleware/logging
 
 Logs all requests made to the server, along with IP and request body.
