@@ -36,7 +36,7 @@ export const STATUS_CODES = {
   500: "Internal Server Error",
 } as const;
 
-type StatusCode = keyof typeof STATUS_CODES;
+export type StatusCode = keyof typeof STATUS_CODES;
 
 const TORRENT_NAME_PATTERN = /^(.+)(?:\.|\s|\+)S0?(\d+)E0?(\d+)/;
 

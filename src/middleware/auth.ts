@@ -1,7 +1,7 @@
 import { NextFunction, Response } from "express";
 import jwt from "jsonwebtoken";
 import { getLogger } from "../logger";
-import { getTokenSecret, sendError } from "../util";
+import { getTokenSecret, sendError, StatusCode } from "../util";
 import { CustomRequest, RequestMethod, UserObj } from "../models";
 
 const logger = getLogger(__filename);
@@ -70,7 +70,7 @@ export function authMiddleware(
     );
   }
 
-  function reject(code: number, message: string) {
+  function reject(code: StatusCode, message: string) {
     if (endpointAccessibleBy.anonymous || DISABLE_AUTH) {
       return void next();
     }
