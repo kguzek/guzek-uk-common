@@ -1,0 +1,32 @@
+{
+  "name": "guzek-uk-common",
+  "version": "1.0.0",
+  "description": "A repository of common libraries and utilities for the Guzek UK Website. ",
+  "engines": {
+    "node": "^22.12.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kguzek/guzek-uk-common.git"
+  },
+  "author": "Konrad Guzek",
+  "license": "AGPL-3.0",
+  "bugs": {
+    "url": "https://github.com/kguzek/guzek-uk-common/issues"
+  },
+  "homepage": "https://github.com/kguzek/guzek-uk-common#readme",
+  "packageManager": "yarn@4.5.3",
+  "dependencies": {
+    "express": "^4.21.2",
+    "fs": "^0.0.1-security",
+    "sequelize": "^6.37.5",
+    "winston": "^3.17.0",
+    "winston-daily-rotate-file": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.10.2",
+    "@types/sequelize": "^4.28.20",
+    "typescript": "^5.7.2"
+  }
+}
