@@ -1,7 +1,7 @@
 import { promises as fs, createReadStream } from "fs";
 import { Request, Response } from "express";
 import { WhereOptions } from "sequelize";
-import { getLogger } from "./middleware/logging";
+import { getLogger } from "./logger";
 import {
   ModelType,
   DownloadStatus,
@@ -10,6 +10,7 @@ import {
   STATIC_CACHE_DURATION_MINS,
 } from "./models";
 import { Updated } from "./sequelize";
+import jwt from "jsonwebtoken";
 
 const logger = getLogger(__filename);
 
@@ -341,3 +342,8 @@ export const serialiseEpisode = (
   `${episode.season}`.padStart(2, "0") +
   "E" +
   `${episode.episode}`.padStart(2, "0");
+
+export function getTokenSecret(type: "access" | "refresh") {
+  const secret = process.env[`JWT_${type.toUpperCase()}_TOKEN_SECRET`];
+  return (secret ?? "") as jwt.Secret;
+}

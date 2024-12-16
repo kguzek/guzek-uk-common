@@ -1,7 +1,7 @@
 import { NextFunction, Response } from "express";
 import jwt from "jsonwebtoken";
-import { getLogger } from "./logging";
-import { sendError } from "../util";
+import { getLogger } from "../logger";
+import { getTokenSecret, sendError } from "../util";
 import { CustomRequest, RequestMethod, UserObj } from "../models";
 
 const logger = getLogger(__filename);
@@ -11,11 +11,6 @@ const DISABLE_AUTH = process.env.NODE_ENV === "development" && false;
 
 // If false, allows requests with expired access tokens to go through
 const VERIFY_TOKEN_EXPIRY = true;
-
-export function getTokenSecret(type: "access" | "refresh") {
-  const secret = process.env[`JWT_${type.toUpperCase()}_TOKEN_SECRET`];
-  return (secret ?? "") as jwt.Secret;
-}
 
 const PERMISSIONS = {
   anonymous: {
