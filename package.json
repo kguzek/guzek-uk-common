@@ -49,7 +49,9 @@
     "./util": "./dist/util.js"
   },
   "files": [
-    "dist/*"
+    "dist",
+    "LICENSE",
+    "README.md"
   ],
   "dependencies": {
     "@types/jsonwebtoken": "^9.0.7",

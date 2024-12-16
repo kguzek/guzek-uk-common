@@ -8,7 +8,7 @@ import { STATUS_CODES, logResponse } from "../util";
 const code = 429;
 const statusMessage = `${code} ${STATUS_CODES[code]}`;
 
-export default function getMiddleware() {
+export function getMiddleware() {
   const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 mins
     limit: 100, // 100 requests per 15 mins
