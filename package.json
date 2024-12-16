@@ -15,7 +15,6 @@
     "url": "https://github.com/kguzek/guzek-uk-common/issues"
   },
   "homepage": "https://github.com/kguzek/guzek-uk-common#readme",
-  "packageManager": "yarn@4.5.3",
   "dependencies": {
     "express": "^4.21.2",
     "fs": "^0.0.1-security",
