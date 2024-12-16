@@ -56,7 +56,8 @@ import { UserObj } from "guzek-uk-common/models";
 
 app.get("/my-uuid", (req, res) => {
   const user: UserObj | undefined = req.user;
-  // If the authentication middleware was set to only allow logged in users to access this endpoint, `user` will definitely be of type `UserObj`.
+  // If the authentication middleware was set to only allow logged in users
+  // to access this endpoint, `user` will definitely be of type `UserObj`.
   res.status(200).send(`Your UUID is ${user?.uuid}!`);
 });
 ```
