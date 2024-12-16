@@ -372,7 +372,7 @@ export function setupEnvironment() {
 }
 
 /** Starts the server on the specified port, and registers a catch-all 404 route. */
-export function startServer(app: Application, port: number) {
+export function startServer(app: Application, port?: string) {
   // Catch-all 404 response for any other route
   app.all("*", (req, res) =>
     sendError(res, 404, {
