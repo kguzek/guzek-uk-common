@@ -1,14 +1,16 @@
 import { NextFunction, Response } from "express";
 import jwt from "jsonwebtoken";
+import { JwksClient } from "jwks-rsa";
 import { getLogger } from "../logger";
 import { sendError, StatusCode } from "../util";
-import { getTokenSecret } from "../setup";
 import { CustomRequest, RequestMethod, UserObj } from "../models";
 
 const logger = getLogger(__filename);
 
+const USE_LOCAL_AUTH_URL = process.env.NODE_ENV === "development";
+
 // Allows all requests to go through, even if JWT authentication fails.
-const DISABLE_AUTH = process.env.NODE_ENV === "development" && false;
+const DISABLE_AUTH = USE_LOCAL_AUTH_URL && false;
 
 // If false, allows requests with expired access tokens to go through
 const VERIFY_TOKEN_EXPIRY = true;
@@ -53,6 +55,20 @@ const PERMISSIONS = {
   },
 } as const;
 
+const jwksClient = new JwksClient({
+  jwksUri: USE_LOCAL_AUTH_URL
+    ? "http://localhost:5019/.well-known/jwks.json"
+    : "https://auth.guzek.uk/.well-known/jwks.json",
+});
+
+function getKey(header: jwt.JwtHeader, callback: jwt.SigningKeyCallback) {
+  jwksClient.getSigningKey(header.kid, (err, key) => {
+    if (err) return callback(err);
+    const signingKey = key?.getPublicKey();
+    callback(null, signingKey);
+  });
+}
+
 export function authMiddleware(
   req: CustomRequest,
   res: Response,
@@ -85,7 +101,7 @@ export function authMiddleware(
     return reject(401, "Missing authorisation token.");
   }
 
-  jwt.verify(token, getTokenSecret("access"), (err, user) => {
+  jwt.verify(token, getKey, (err, user) => {
     if (err) {
       logger.error(err);
       return reject(401, "Invalid authorisation token.");

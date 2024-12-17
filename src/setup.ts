@@ -1,11 +1,5 @@
 import { dirname, resolve } from "path";
 import dotenv from "dotenv";
-import jwt from "jsonwebtoken";
-
-export function getTokenSecret(type: "access" | "refresh") {
-  const secret = process.env[`JWT_${type.toUpperCase()}_TOKEN_SECRET`];
-  return (secret ?? "") as jwt.Secret;
-}
 
 /**
  * Reads the `.env` file and prepares for server start.
