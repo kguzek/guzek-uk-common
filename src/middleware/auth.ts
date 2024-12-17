@@ -24,7 +24,7 @@ const PERMISSIONS = {
       "/liveseries/video", // Stream downloaded LiveSeries episode
       "/liveseries/subtitles", // Fetch episode subtitles
       "/torrents", // Search for torrents using scraper
-      "/.well-known", // JKWS for JWT
+      "/.well-known", // JWKS for JWT
     ],
     POST: [
       "/auth/users", // Sign up
@@ -39,17 +39,17 @@ const PERMISSIONS = {
     GET: [
       "/tu-lalem", // View all app coordinates
       "/auth/usernames", // View all usernames
-      "/liveseries/liked-shows/personal", // View own liked shows
+      "/liveseries/shows/personal", // View own liked/subscribed shows
       "/liveseries/watched-episodes/personal", // View own watched episodes
     ],
     POST: [
       "/tu-lalem", // Submit app coordinates
-      "/liveseries/liked-shows/personal", // Add show to liked list
+      "/liveseries/shows/personal", // Add show to liked/subscribed list
     ],
     PUT: ["/liveseries/watched-episodes/personal"], // Modify own watched episodes
     DELETE: [
       "/auth/tokens", // Log out
-      "/liveseries/liked-shows/personal", // Remove show from liked list
+      "/liveseries/shows/personal", // Remove show from liked/subscribed list
     ],
     PATCH: [],
   },
