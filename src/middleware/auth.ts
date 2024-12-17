@@ -29,7 +29,7 @@ const PERMISSIONS = {
     POST: [
       "/auth/users", // Sign up
       "/auth/tokens", // Log in
-      "/auth/access", // Regenerate access token
+      "/auth/refresh", // Regenerate access token
     ],
     PUT: [],
     DELETE: [],
