@@ -181,7 +181,10 @@ export class DownloadedEpisode extends Model {
   episode!: number;
 }
 
-export function initialiseSequelize(debugMode: boolean) {
+export function initialiseSequelize(
+  debugMode: boolean,
+  isDecentralised: boolean = false
+) {
   const session = {
     host: process.env.MY_SQL_DB_HOST ?? "127.0.0.1",
     port: process.env.MY_SQL_DB_PORT ?? "3306",
@@ -199,17 +202,18 @@ export function initialiseSequelize(debugMode: boolean) {
       host: session.host,
       dialect: "mysql",
       logging: debugMode && console.log,
-      models: [
-        Page,
-        PageContent,
-        User,
-        Token,
-        Updated,
-        TuLalem,
-        UserShows,
-        WatchedEpisodes,
-        DownloadedEpisode,
-      ],
+      models: isDecentralised
+        ? [DownloadedEpisode]
+        : [
+            Page,
+            PageContent,
+            User,
+            Token,
+            Updated,
+            TuLalem,
+            UserShows,
+            WatchedEpisodes,
+          ],
       define: {
         underscored: true,
         timestamps: false,
