@@ -15,7 +15,7 @@
     "url": "git+https://github.com/kguzek/guzek-uk-common.git"
   },
   "author": "Konrad Guzek",
-  "license": "AGPL-3.0",
+  "license": "AGPL-3.0-only",
   "bugs": {
     "url": "https://github.com/kguzek/guzek-uk-common/issues"
   },
