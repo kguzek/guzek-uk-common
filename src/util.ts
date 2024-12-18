@@ -1,15 +1,23 @@
 import { promises as fs, createReadStream } from "fs";
 import { Application, Request, Response } from "express";
-import { WhereOptions } from "sequelize";
+import {
+  Attributes,
+  FindOptions,
+  Identifier,
+  InferCreationAttributes,
+  Model,
+  ModelStatic,
+  WhereOptions,
+} from "sequelize";
 import { getLogger } from "./logger";
 import {
-  ModelType,
   DownloadStatus,
   TorrentInfo,
   Episode,
   STATIC_CACHE_DURATION_MINS,
 } from "./models";
 import { Updated } from "./sequelize";
+import { MakeNullishOptional } from "sequelize/lib/utils";
 
 const logger = getLogger(__filename);
 
@@ -38,7 +46,9 @@ export type StatusCode = keyof typeof STATUS_CODES;
 const TORRENT_NAME_PATTERN = /^(.+)(?:\.|\s|\+)S0?(\d+)E0?(\d+)/;
 
 /** Updates the 'timestamp' column for the given endpoint in the 'updated' table with the current Epoch time. */
-export async function updateEndpoint(endpointClass: ModelType) {
+export async function updateEndpoint<T extends Model>(
+  endpointClass: ModelStatic<T>
+) {
   const newValue = { timestamp: new Date().getTime() };
   const endpoint = endpointClass.tableName;
   const row = await Updated.findOne({ where: { endpoint } });
@@ -57,6 +67,9 @@ export const logResponse = (res: Response, message: string) =>
 
 export const getStatusText = (code: StatusCode) =>
   `${code} ${STATUS_CODES[code]}`;
+
+const isResponse = (res: any): res is Response =>
+  res?.status && typeof res.status === "function";
 
 /** Sends the response with a 200 status and JSON body containing the given data object. */
 export function sendOK(res: Response, data?: any, code: StatusCode = 200) {
@@ -88,39 +101,39 @@ export function sendError(
  *  Sends a response containing the created data, unless `sendMethod` is specified.
  *  Returns `true` if the operation succeeded, else `false` if a 500 response was sent.
  */
-export async function createDatabaseEntry(
-  model: ModelType,
-  req: Request,
-  res: Response,
-  modelParams?: Record<string, any>,
+export async function createDatabaseEntry<T extends Model>(
+  model: ModelStatic<T>,
+  modelParams: MakeNullishOptional<InferCreationAttributes<T>>,
+  res?: Response,
   sendMethod?: (resp: Response, data: any, code: number) => void
 ) {
   let obj;
   try {
-    obj = await model.create(modelParams ?? req.body);
+    obj = await model.create(modelParams);
   } catch (error) {
     if ((error as Error).name === "SequelizeUniqueConstraintError")
-      return sendError(res, 400, {
-        message: "Cannot create duplicate entries.",
-      });
+      if (res)
+        sendError(res, 400, {
+          message: "Cannot create duplicate entries.",
+        });
     logger.error("Error while creating database entry: " + error);
-    sendError(res, 500, error as Error);
+    if (res) sendError(res, 500, error as Error);
     return false;
   }
   await updateEndpoint(model);
-  (sendMethod ?? sendOK)(res, obj, 201);
+  if (res) (sendMethod ?? sendOK)(res, obj, 201);
   return true;
 }
 
 /** Retrieves all entries in the database table model derivative provided. */
-export async function readAllDatabaseEntries<T extends ModelType>(
-  model: T,
+export async function readAllDatabaseEntries<T extends Model>(
+  model: ModelStatic<T>,
   res: Response,
-  callback?: (data: InstanceType<T>[]) => void
+  callback?: (data: T[]) => void
 ) {
   let objs;
   try {
-    objs = (await model.findAll()) as InstanceType<T>[];
+    objs = await model.findAll();
   } catch (error) {
     return void sendError(res, 500, error as Error);
   }
@@ -131,33 +144,62 @@ export async function readAllDatabaseEntries<T extends ModelType>(
   }
 }
 
-/** Retrieves all entries in the database with the provided values and returns the array. */
-export async function readDatabaseEntry<T extends ModelType>(
-  model: T,
-  res: Response,
-  where: WhereOptions,
-  onError?: (error: Error) => void,
+const isErrorCallback = (onError: any): onError is (error: Error) => void =>
+  typeof onError === "function";
+
+/**
+ * Retrieves all entries in the database which match the query and returns the array.
+ * @param model the model instance to query
+ * @param where the values to search for, e.g. { id: 1 }
+ * @param onError the `Response` to which to send HTTP 500 if an error occurs, or a callback function to call when `findAll` fails.
+ * If not provided, the function will silently return an empty array on error.
+ * @param allowEmptyResults if true, this will also call `onError` if the query returns no results (default: `false`)
+ */
+export async function queryDatabase<
+  T extends Model,
+  Y extends ((error: Error) => void) | Response | undefined
+>(
+  model: ModelStatic<T>,
+  query: FindOptions<Attributes<T>>,
+  onError?: Y,
+  allowEmptyResults?: boolean
+): Promise<Y extends undefined ? T[] : void>;
+export async function queryDatabase<T extends Model>(
+  model: ModelStatic<T>,
+  query: FindOptions<Attributes<T>>,
+  onError?: ((error: Error) => void) | Response,
   allowEmptyResults: boolean = false
-) {
+): Promise<T[] | void> {
   let objs;
   try {
-    objs = (await model.findAll({ where })) as InstanceType<T>[];
+    objs = await model.findAll(query);
     if (objs.length === 0 && !allowEmptyResults) {
       throw Error("The database query returned no results.");
     }
   } catch (error) {
-    return void (onError
-      ? onError(error as Error)
-      : sendError(res, 500, error as Error));
+    if (isResponse(onError)) {
+      sendError(onError, 500, error as Error);
+      return;
+    }
+    if (isErrorCallback(onError)) {
+      onError(error as Error);
+      return;
+    }
+    return [] as T[];
   }
   return objs;
 }
 
+export const findUnique = <T extends Model>(
+  model: ModelStatic<T>,
+  primaryKey?: Identifier
+) => (primaryKey ? model.findByPk(primaryKey) : null);
+
 /** Updates the entry with the request payload in the database table model derivative provided.
  *  Sends back a response containing the number of affected rows.
  */
-export async function updateDatabaseEntry(
-  model: ModelType,
+export async function updateDatabaseEntry<T extends Model>(
+  model: ModelStatic<T>,
   req: Request,
   res: Response,
   modelParams?: Record<string, any>,
@@ -183,8 +225,8 @@ export async function updateDatabaseEntry(
 /** Deletes the specified entry from the database table model derivative provided.
  *  Sends back a response containing the number of destroyed rows.
  */
-export async function deleteDatabaseEntry(
-  model: ModelType,
+export async function deleteDatabaseEntry<T extends Model>(
+  model: ModelStatic<T>,
   where: WhereOptions,
   res?: Response
 ) {

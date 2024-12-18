@@ -1,14 +1,14 @@
 {
   "name": "guzek-uk-common",
-  "version": "1.2.4",
+  "version": "1.4.1",
   "description": "A repository of common libraries and utilities for the Guzek UK Website. ",
   "engines": {
     "node": "^22.12.0"
   },
   "scripts": {
     "build": "tsc && npm pack",
-    "publish": "npm publish --access public",
-    "deploy": "npm run build && npm run publish"
+    "release": "npm publish --access public",
+    "deploy": "npm run build && npm run release"
   },
   "repository": {
     "type": "git",

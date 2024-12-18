@@ -1,5 +1,4 @@
 import { Request } from "express";
-import { Page, PageContent, Token, TuLalem, User } from "./sequelize";
 import { convertTorrentInfo } from "./util";
 
 export type RequestMethod = "GET" | "PUT" | "POST" | "DELETE" | "PATCH";
@@ -37,13 +36,6 @@ export const ORDER_ATTRIBUTES = [
 export type LatLngObj = { lat: number; lng: number };
 export type LatLngArr = [number, number];
 export type LatLng = LatLngObj | LatLngArr;
-
-export type ModelType =
-  | typeof Page
-  | typeof PageContent
-  | typeof User
-  | typeof Token
-  | typeof TuLalem;
 
 export interface UserObj {
   uuid: string;
