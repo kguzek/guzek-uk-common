@@ -7,10 +7,18 @@ import { CustomRequest, RequestMethod, UserObj } from "../models";
 
 const logger = getLogger(__filename);
 
-const USE_LOCAL_AUTH_URL = process.env.NODE_ENV === "development";
+const DEBUG_MODE = process.env.NODE_ENV === "development";
 
 // Allows all requests to go through, even if JWT authentication fails.
-const DISABLE_AUTH = USE_LOCAL_AUTH_URL && false;
+const DISABLE_AUTH =
+  DEBUG_MODE && process.env.DANGEROUSLY_DISABLE_AUTHENTICATION === "true";
+
+const USE_LOCAL_AUTH_URL =
+  DEBUG_MODE && process.env.USE_LOCAL_AUTH_URL === "true";
+
+const AUTH_SERVER_URL = USE_LOCAL_AUTH_URL
+  ? "http://localhost:5019"
+  : "https://auth.guzek.uk";
 
 // If false, allows requests with expired access tokens to go through
 const VERIFY_TOKEN_EXPIRY = true;
@@ -56,9 +64,7 @@ const PERMISSIONS = {
 } as const;
 
 const jwksClient = new JwksClient({
-  jwksUri: USE_LOCAL_AUTH_URL
-    ? "http://localhost:5019/.well-known/jwks.json"
-    : "https://auth.guzek.uk/.well-known/jwks.json",
+  jwksUri: AUTH_SERVER_URL + "/.well-known/jwks.json",
 });
 
 function getKey(header: jwt.JwtHeader, callback: jwt.SigningKeyCallback) {
@@ -91,6 +97,12 @@ export function authMiddleware(
   function reject(code: StatusCode, message: string) {
     if (endpointAccessibleBy.anonymous || DISABLE_AUTH) {
       return void next();
+    }
+    if (code === 401) {
+      res.setHeader(
+        "WWW-Authenticate",
+        `Bearer realm="${AUTH_SERVER_URL}", error="invalid_token", error_description="${message}"`
+      );
     }
     sendError(res, code, { message });
   }

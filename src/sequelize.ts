@@ -38,7 +38,10 @@ export class Page extends Model {
   shouldFetch!: boolean;
 }
 
-@Table({})
+@Table({
+  // `tableName` defaults to "page_contents"
+  tableName: "page_content",
+})
 export class PageContent extends Model {
   @Column({ allowNull: false, field: "content_en" })
   contentEN!: string;
@@ -82,7 +85,10 @@ export class Token extends Model {
   value!: string;
 }
 
-@Table({})
+@Table({
+  // `tableName` defaults to "updateds"
+  tableName: "updated",
+})
 export class Updated extends Model {
   @Column({ allowNull: false })
   endpoint!: string;
@@ -90,7 +96,13 @@ export class Updated extends Model {
   timestamp!: number;
 }
 
-@Table({ timestamps: true, createdAt: "timestamp", updatedAt: false })
+@Table({
+  // `tableName` defaults to "tu_lalems"
+  tableName: "tu_lalem",
+  timestamps: true,
+  createdAt: "timestamp",
+  updatedAt: false,
+})
 export class TuLalem extends Model {
   @Column({
     allowNull: false,
