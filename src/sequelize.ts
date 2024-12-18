@@ -71,6 +71,8 @@ export class User extends Model {
   salt!: string;
   @Column({ defaultValue: false })
   admin!: boolean;
+  @Column({})
+  serverUrl!: string;
   @HasOne(() => UserShows, { foreignKey: "user_uuid" })
   userShows!: UserShows | null;
   @HasOne(() => WatchedEpisodes, { foreignKey: "user_uuid" })
