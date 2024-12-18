@@ -147,29 +147,30 @@ export async function readAllDatabaseEntries<T extends Model>(
 const isErrorCallback = (onError: any): onError is (error: Error) => void =>
   typeof onError === "function";
 
+type OnError = ((error: Error) => void) | Response;
+
 /**
  * Retrieves all entries in the database which match the query and returns the array.
  * @param model the model instance to query
  * @param where the values to search for, e.g. { id: 1 }
  * @param onError the `Response` to which to send HTTP 500 if an error occurs, or a callback function to call when `findAll` fails.
- * If not provided, the function will silently return an empty array on error.
+ * If provided, the function will return `null` on error, othwerwies it will silently return an empty array on error.
  * @param allowEmptyResults if true, this will also call `onError` if the query returns no results (default: `false`)
  */
 export async function queryDatabase<
   T extends Model,
-  Y extends ((error: Error) => void) | Response | undefined
+  Y extends [] | [OnError] | [OnError, boolean]
 >(
   model: ModelStatic<T>,
   query: FindOptions<Attributes<T>>,
-  onError?: Y,
-  allowEmptyResults?: boolean
-): Promise<Y extends undefined ? T[] : void>;
+  ...[onError, allowEmptyResults]: Y
+): Promise<T[] | null>;
 export async function queryDatabase<T extends Model>(
   model: ModelStatic<T>,
   query: FindOptions<Attributes<T>>,
-  onError?: ((error: Error) => void) | Response,
+  onError?: OnError,
   allowEmptyResults: boolean = false
-): Promise<T[] | void> {
+): Promise<T[] | null> {
   let objs;
   try {
     objs = await model.findAll(query);
@@ -179,13 +180,13 @@ export async function queryDatabase<T extends Model>(
   } catch (error) {
     if (isResponse(onError)) {
       sendError(onError, 500, error as Error);
-      return;
+      return null;
     }
     if (isErrorCallback(onError)) {
       onError(error as Error);
-      return;
+      return null;
     }
-    return [] as T[];
+    return [];
   }
   return objs;
 }
