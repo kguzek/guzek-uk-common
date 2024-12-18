@@ -183,7 +183,7 @@ export class DownloadedEpisode extends Model {
 
 export function initialiseSequelize(
   debugMode: boolean,
-  isDecentralised: boolean = false
+  isDecentralised: boolean
 ) {
   const session = {
     host: process.env.MY_SQL_DB_HOST ?? "127.0.0.1",

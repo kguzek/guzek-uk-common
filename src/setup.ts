@@ -6,7 +6,7 @@ import { initialiseSequelize } from "./sequelize";
  * Reads the `.env` file and prepares for server start.
  * Returns `true` if the server is in development mode, else `false`.
  */
-export function setupEnvironment() {
+export function setupEnvironment(isDecentralised: boolean = false): boolean {
   const entryPoint = require.main?.filename;
   if (!entryPoint) {
     throw new Error("Unable to determine the entry point of the application.");
@@ -25,6 +25,6 @@ export function setupEnvironment() {
     console.log();
   }
 
-  initialiseSequelize(debugMode);
+  initialiseSequelize(debugMode, isDecentralised);
   return debugMode;
 }
