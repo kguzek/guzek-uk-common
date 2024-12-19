@@ -180,7 +180,7 @@ export class DownloadedEpisode extends Model {
   showId!: number;
   @NotNull({
     set(value: string) {
-      this.setDataValue("show_name", sanitiseShowName(value));
+      this.setDataValue("showName", sanitiseShowName(value));
     },
   })
   showName!: string;
