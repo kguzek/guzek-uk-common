@@ -161,7 +161,12 @@ export class WatchedEpisodes extends Model {
   @ForeignKey(() => User)
   @NotNull({ primaryKey: true })
   userUuid!: string;
-  @NotNull({ type: DataType.JSON })
+  @NotNull({
+    type: DataType.JSON,
+    get() {
+      return getJson(this.getDataValue("watchedEpisodes"));
+    },
+  })
   watchedEpisodes!: WatchedShowData;
   @BelongsTo(() => User)
   user!: User;
