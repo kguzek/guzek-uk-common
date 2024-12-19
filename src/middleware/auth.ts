@@ -107,8 +107,9 @@ export function authMiddleware(
     sendError(res, code, { message });
   }
 
-  const authHeader = req.headers.authorization;
-  const token = authHeader?.split(" ")?.[1];
+  const token =
+    req.headers.authorization?.split(" ")?.[1] ||
+    (req.query.access_token as string | undefined);
   if (!token) {
     return reject(401, "Missing authorisation token.");
   }
