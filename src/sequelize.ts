@@ -32,9 +32,9 @@ export class Page extends Model {
   @NotNull({ primaryKey: true, autoIncrement: true })
   id!: number;
   @NotNull()
-  titleEN!: string;
+  titleEn!: string;
   @NotNull()
-  titlePL!: string;
+  titlePl!: string;
   @NotNull()
   url!: string;
   @NotNull()
@@ -54,9 +54,9 @@ export class PageContent extends Model {
   @NotNull({ primaryKey: true })
   pageId!: number;
   @NotNull()
-  contentEN!: string;
+  contentEn!: string;
   @NotNull()
-  contentPL!: string;
+  contentPl!: string;
   @BelongsTo(() => Page)
   page!: Page;
 }
