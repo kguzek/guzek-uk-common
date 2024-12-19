@@ -19,6 +19,10 @@ const logger = getLogger(__filename);
 export const sanitiseShowName = (showName: string) =>
   showName.replace(/[.+]/g, " ").replace(/:\//g, "").trim();
 
+/** This is NEEDED when using MariaDB, as Sequelize reads DataType.JSON fields as strings */
+const getJson = (value: string) =>
+  typeof value === "string" ? JSON.parse(value) : value;
+
 // Custom decorator to enforce allowNull: false by default
 function NotNull(options: Partial<ModelAttributeColumnOptions> = {}) {
   return Column({
@@ -134,9 +138,19 @@ export class UserShows extends Model {
   @ForeignKey(() => User)
   @NotNull({ primaryKey: true })
   userUuid!: string;
-  @NotNull({ type: DataType.JSON })
+  @NotNull({
+    type: DataType.JSON,
+    get() {
+      return getJson(this.getDataValue("likedShows"));
+    },
+  })
   likedShows!: number[];
-  @NotNull({ type: DataType.JSON })
+  @NotNull({
+    type: DataType.JSON,
+    get() {
+      return getJson(this.getDataValue("subscribedShows"));
+    },
+  })
   subscribedShows!: number[];
   @BelongsTo(() => User)
   user!: User;
