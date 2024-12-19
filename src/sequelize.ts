@@ -7,34 +7,41 @@ import {
   BelongsTo,
   HasOne,
   HasMany,
+  ForeignKey,
 } from "sequelize-typescript";
 import { getLogger } from "./logger";
 import { LatLngArr, WatchedShowData } from "./models";
+import { ModelAttributeColumnOptions } from "sequelize";
 
 const logger = getLogger(__filename);
-
-const ensureJson = (dataValue: any) =>
-  typeof dataValue === "string" ? JSON.parse(dataValue) : dataValue;
 
 /** Converts periods and plus symbols into spaces, and removes `:/` sequences. */
 export const sanitiseShowName = (showName: string) =>
   showName.replace(/[.+]/g, " ").replace(/:\//g, "").trim();
 
+// Custom decorator to enforce allowNull: false by default
+function NotNull(options: Partial<ModelAttributeColumnOptions> = {}) {
+  return Column({
+    allowNull: false, // Default value
+    ...options, // Override defaults if explicitly specified
+  });
+}
+
 @Table({})
 export class Page extends Model {
-  @Column({ primaryKey: true, autoIncrement: true })
+  @NotNull({ primaryKey: true, autoIncrement: true })
   id!: number;
-  @Column({ allowNull: false, field: "title_en" })
+  @NotNull()
   titleEN!: string;
-  @Column({ allowNull: false, field: "title_pl" })
+  @NotNull()
   titlePL!: string;
-  @Column({ allowNull: false })
+  @NotNull()
   url!: string;
-  @Column({ field: "local_url", allowNull: false })
+  @NotNull()
   localUrl!: boolean;
-  @Column({ field: "admin_only", allowNull: false })
+  @NotNull()
   adminOnly!: boolean;
-  @Column({ field: "should_fetch", allowNull: false })
+  @NotNull()
   shouldFetch!: boolean;
 }
 
@@ -43,35 +50,35 @@ export class Page extends Model {
   tableName: "page_content",
 })
 export class PageContent extends Model {
-  @Column({ allowNull: false, field: "content_en" })
+  @ForeignKey(() => Page)
+  @NotNull({ primaryKey: true })
+  pageId!: number;
+  @NotNull()
   contentEN!: string;
-  @Column({ allowNull: false, field: "content_pl" })
+  @NotNull()
   contentPL!: string;
-
-  @BelongsTo(() => Page, { foreignKey: "page_id" })
+  @BelongsTo(() => Page)
   page!: Page;
 }
 
 @Table({ timestamps: true, updatedAt: "modified_at" })
 export class User extends Model {
-  @Column({
-    type: DataType.STRING(36),
-    allowNull: false,
+  @NotNull({
     unique: true,
     primaryKey: true,
   })
   uuid!: string;
-  @Column({ type: DataType.STRING(64), allowNull: false })
+  @NotNull()
   username!: string;
-  @Column({ allowNull: false })
+  @NotNull()
   email!: string;
-  @Column({ allowNull: false })
+  @NotNull()
   hash!: string;
-  @Column({ allowNull: false })
+  @NotNull()
   salt!: string;
-  @Column({ defaultValue: false })
+  @NotNull({ defaultValue: false })
   admin!: boolean;
-  @Column({})
+  @NotNull({ defaultValue: "" })
   serverUrl!: string;
   @HasOne(() => UserShows, { foreignKey: "user_uuid" })
   userShows!: UserShows | null;
@@ -83,7 +90,7 @@ export class User extends Model {
 
 @Table({ timestamps: true, updatedAt: false })
 export class Token extends Model {
-  @Column({ allowNull: false, primaryKey: true })
+  @NotNull({ primaryKey: true })
   value!: string;
 }
 
@@ -92,9 +99,9 @@ export class Token extends Model {
   tableName: "updated",
 })
 export class Updated extends Model {
-  @Column({ allowNull: false })
+  @NotNull()
   endpoint!: string;
-  @Column({ allowNull: false })
+  @NotNull()
   timestamp!: number;
 }
 
@@ -106,8 +113,10 @@ export class Updated extends Model {
   updatedAt: false,
 })
 export class TuLalem extends Model {
-  @Column({
-    allowNull: false,
+  @ForeignKey(() => User)
+  @NotNull({ primaryKey: true })
+  userUuid!: string;
+  @NotNull({
     type: DataType.GEOMETRY("POINT"),
     get() {
       const coords = this.getDataValue("coordinates").coordinates;
@@ -116,74 +125,53 @@ export class TuLalem extends Model {
     },
   })
   coordinates!: LatLngArr;
-  @BelongsTo(() => User, { foreignKey: "user_uuid" })
+  @BelongsTo(() => User)
   user!: User;
 }
 
 @Table({})
 export class UserShows extends Model {
-  @Column({ allowNull: false, field: "user_uuid", primaryKey: true })
-  userUUID!: string;
-  @Column({
-    allowNull: false,
-    field: "liked_shows",
-    type: DataType.JSON,
-    get() {
-      return ensureJson(this.getDataValue("liked_shows"));
-    },
-  })
+  @ForeignKey(() => User)
+  @NotNull({ primaryKey: true })
+  userUuid!: string;
+  @NotNull({ type: DataType.JSON })
   likedShows!: number[];
-  @Column({
-    allowNull: false,
-    field: "subscribed_shows",
-    type: DataType.JSON,
-    get() {
-      return ensureJson(this.getDataValue("subscribed_shows"));
-    },
-  })
+  @NotNull({ type: DataType.JSON })
   subscribedShows!: number[];
-  @BelongsTo(() => User, { foreignKey: "user_uuid" })
+  @BelongsTo(() => User)
   user!: User;
 }
 
 @Table({})
 export class WatchedEpisodes extends Model {
-  @Column({ allowNull: false, field: "user_uuid", primaryKey: true })
-  userUUID!: string;
-  @Column({
-    allowNull: false,
-    field: "watched_episodes",
-    type: DataType.JSON,
-    get() {
-      return ensureJson(this.getDataValue("watched_episodes"));
-    },
-  })
+  @ForeignKey(() => User)
+  @NotNull({ primaryKey: true })
+  userUuid!: string;
+  @NotNull({ type: DataType.JSON })
   watchedEpisodes!: WatchedShowData;
-  @BelongsTo(() => User, { foreignKey: "user_uuid" })
+  @BelongsTo(() => User)
   user!: User;
 }
 
 @Table({})
 export class DownloadedEpisode extends Model {
-  @Column({ primaryKey: true, autoIncrement: true })
+  @NotNull({ primaryKey: true, autoIncrement: true })
   id!: number;
-  @Column({ allowNull: false, field: "show_id" })
+  @NotNull()
   showId!: number;
-  @Column({
-    allowNull: false,
-    field: "show_name",
+  @NotNull({
     set(value: string) {
       this.setDataValue("show_name", sanitiseShowName(value));
     },
   })
   showName!: string;
-  @Column({ allowNull: false })
+  @NotNull()
   season!: number;
-  @Column({ allowNull: false })
+  @NotNull()
   episode!: number;
 }
 
-export function initialiseSequelize(
+export async function initialiseSequelize(
   debugMode: boolean,
   isDecentralised: boolean
 ) {
@@ -224,13 +212,18 @@ export function initialiseSequelize(
   );
 
   // Establish the database connection
-  sequelize
-    .authenticate()
-    .then(() => logger.debug("Database connection established"))
-    .catch((error) => logger.error("Error connecting to the database:", error));
+  try {
+    await sequelize.authenticate();
+  } catch (error) {
+    logger.error("Could not connect to the database:", error);
+    return error as Error;
+  }
+
+  logger.debug("Database connection established successfully.");
 
   // Sync models (if needed)
   if (debugMode) {
-    sequelize.sync();
+    await sequelize.sync();
   }
+  return null;
 }

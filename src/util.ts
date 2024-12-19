@@ -39,6 +39,7 @@ export const STATUS_CODES = {
   409: "Conflict",
   429: "Too Many Requests",
   500: "Internal Server Error",
+  503: "Service Unavailable",
 } as const;
 
 export type StatusCode = keyof typeof STATUS_CODES;
