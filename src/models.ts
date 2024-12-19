@@ -103,4 +103,9 @@ export type BasicEpisode = Pick<
   "showName" | "season" | "episode"
 >;
 
+export interface BasicTvShow {
+  showName: string;
+  showId: number;
+}
+
 export const STATIC_CACHE_DURATION_MINS = 30 * 24 * 60; // 30 days in minutes

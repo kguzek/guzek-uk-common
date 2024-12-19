@@ -65,7 +65,7 @@ export class PageContent extends Model {
   page!: Page;
 }
 
-@Table({ timestamps: true, updatedAt: "modified_at" })
+@Table({ timestamps: true, updatedAt: "modified_at", createdAt: "created_at" })
 export class User extends Model {
   @NotNull({
     unique: true,
