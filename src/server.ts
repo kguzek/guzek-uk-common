@@ -1,6 +1,6 @@
 import { Application } from "express";
 import { getLogger } from "./logger";
-import { sendError, sendOK } from "./util";
+import { send405, sendError, sendOK } from "./util";
 
 const logger = getLogger(__filename);
 
@@ -29,8 +29,10 @@ export function startServer(app: Application) {
   const port = getServerPort();
   if (!port) return;
 
-  app.get(HEALTHCHECK_PATH, (_, res) =>
-    sendOK(res, { message: "Server is up" })
+  app.get(
+    HEALTHCHECK_PATH,
+    (_, res) => sendOK(res, { message: "Server is up" }),
+    send405
   );
 
   // Catch-all 404 response for any other route

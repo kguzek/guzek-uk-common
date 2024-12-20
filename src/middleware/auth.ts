@@ -38,6 +38,7 @@ const PERMISSIONS = {
       "/liveseries/subtitles", // Fetch episode subtitles
       "/torrents", // Search for torrents using scraper
       "/.well-known", // JWKS for JWT
+      "/health", // Health check
     ],
     POST: [
       "/auth/users", // Sign up
