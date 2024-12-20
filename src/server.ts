@@ -25,7 +25,7 @@ function getServerPort() {
 }
 
 /** Starts the server on the specified port, and registers a catch-all 404 route. */
-export function startServer(app: Application, endpoints: string[]) {
+export function startServer(app: Application) {
   const port = getServerPort();
   if (!port) return;
 
