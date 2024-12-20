@@ -401,3 +401,21 @@ export function startServer(
 
   app.listen(port, host, () => logger.info(`API listening on port ${port}.`));
 }
+
+export function getServerPort() {
+  const port = process.env.NODE_PORT;
+  if (port == null || port === "") {
+    logger.error("No NODE_PORT environment variable set.");
+    return null;
+  }
+  if (!/^\d+$/.test(port)) {
+    logger.error("NODE_PORT is set to a non-integer value.");
+    return null;
+  }
+  const portInt = +port;
+  if (portInt < 0 || portInt > 65535) {
+    logger.error("NODE_PORT is set to an invalid port number.");
+    return null;
+  }
+  return portInt;
+}
