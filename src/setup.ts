@@ -1,6 +1,7 @@
 import { dirname, resolve } from "path";
 import dotenv from "dotenv";
 import { initialiseSequelize } from "./sequelize";
+import { Application } from "express";
 
 /**
  * Reads the `.env` file and prepares for server start.
