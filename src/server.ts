@@ -1,6 +1,8 @@
 import { Application, Request, Response } from "express";
 import { getLogger } from "./logger";
 import { sendError, sendOK } from "./util";
+import { getRootDirectory } from "./setup";
+import { resolve } from "path";
 
 const logger = getLogger(__filename);
 
@@ -37,8 +39,11 @@ const send405 = (req: Request, res: Response) =>
  * @param endpoints the array of paths to the route file, with an assumed base directory of `/src/routes/`.
  */
 async function initialiseEndpoints(app: Application, endpoints: string[]) {
+  const appDirectory = getRootDirectory();
   for (const endpoint of endpoints) {
-    const middleware = await import("./src/routes/" + endpoint);
+    const middleware = await import(
+      resolve(appDirectory, "src", "routes", endpoint)
+    );
     if (middleware.init) middleware.init(endpoints);
     const path = `/${endpoint}`;
     app.use(path, middleware.router, send405);
