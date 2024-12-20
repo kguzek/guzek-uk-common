@@ -13,6 +13,11 @@ const DEBUG_MODE = process.env.NODE_ENV === "development";
 const DISABLE_AUTH =
   DEBUG_MODE && process.env.DANGEROUSLY_DISABLE_AUTHENTICATION === "true";
 
+if (DISABLE_AUTH)
+  logger.warn(
+    "Authentication is disabled: all API routes are publicly accessible. Do not use this setting in production!"
+  );
+
 const USE_LOCAL_AUTH_URL =
   DEBUG_MODE && process.env.USE_LOCAL_AUTH_URL === "true";
 

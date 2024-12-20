@@ -387,7 +387,11 @@ export const serialiseEpisode = (
   `${episode.episode}`.padStart(2, "0");
 
 /** Starts the server on the specified port, and registers a catch-all 404 route. */
-export function startServer(app: Application, port?: string) {
+export function startServer(
+  app: Application,
+  port: number,
+  host: string = "127.0.0.1"
+) {
   // Catch-all 404 response for any other route
   app.all("*", (req, res) =>
     sendError(res, 404, {
@@ -395,5 +399,5 @@ export function startServer(app: Application, port?: string) {
     })
   );
 
-  app.listen(port, () => logger.info(`API listening on port ${port}.`));
+  app.listen(port, host, () => logger.info(`API listening on port ${port}.`));
 }

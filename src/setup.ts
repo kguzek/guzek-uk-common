@@ -4,7 +4,8 @@ import { initialiseSequelize } from "./sequelize";
 
 /**
  * Reads the `.env` file and prepares for server start.
- * Returns `true` if the server is in development mode, else `false`.
+ * @param isDecentralised pass `true` if this is a LiveSeries server, so that the correct database configuration is used. Default: `false`.
+ * @returns `true` if the server is in development mode, else `false`.
  */
 export function setupEnvironment(isDecentralised: boolean = false): boolean {
   const entryPoint = require.main?.filename;
