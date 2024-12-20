@@ -390,7 +390,7 @@ export const serialiseEpisode = (
 export function startServer(
   app: Application,
   port: number,
-  host: string = "127.0.0.1"
+  host: string = "0.0.0.0"
 ) {
   // Catch-all 404 response for any other route
   app.all("*", (req, res) =>
