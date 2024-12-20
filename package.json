@@ -1,6 +1,6 @@
 {
   "name": "guzek-uk-common",
-  "version": "1.7.3",
+  "version": "1.7.4",
   "description": "1 repository of common libraries and utilities for the Guzek UK Website. ",
   "author": "Konrad Guzek",
   "homepage": "https://github.com/kguzek/guzek-uk-common#readme",
@@ -38,6 +38,9 @@
       "sequelize": [
         "dist/sequelize.d.ts"
       ],
+      "server": [
+        "dist/server.d.ts"
+      ],
       "setup": [
         "dist/setup.d.ts"
       ],
@@ -52,6 +55,7 @@
     "./maths": "./dist/maths.js",
     "./models": "./dist/models.js",
     "./sequelize": "./dist/sequelize.js",
+    "./server": "./dist/server.js",
     "./setup": "./dist/setup.js",
     "./util": "./dist/util.js"
   },
