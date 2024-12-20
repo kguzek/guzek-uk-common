@@ -1,12 +1,12 @@
 {
   "name": "guzek-uk-common",
-  "version": "1.7.0",
-  "description": "A repository of common libraries and utilities for the Guzek UK Website. ",
+  "version": "1.7.1",
+  "description": "1 repository of common libraries and utilities for the Guzek UK Website. ",
   "author": "Konrad Guzek",
   "homepage": "https://github.com/kguzek/guzek-uk-common#readme",
   "license": "AGPL-3.0-only",
   "engines": {
-    "node": ">=22.12.0"
+    "node": ">=22.3.0"
   },
   "scripts": {
     "clean": "rm -r dist guzek-uk-common-*.tgz",
