@@ -386,3 +386,10 @@ export const serialiseEpisode = (
   `${episode.season}`.padStart(2, "0") +
   "E" +
   `${episode.episode}`.padStart(2, "0");
+
+export const send405 = (req: Request, res: Response) =>
+  sendError(res, 405, {
+    message: `You cannot ${req.method.toUpperCase()} the resource at '${
+      req.originalUrl
+    }'.`,
+  });
