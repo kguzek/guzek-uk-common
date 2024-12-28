@@ -252,7 +252,7 @@ export const isInvalidDate = (date: Date) => date.toString() === "Invalid Date";
 
 /** Sets the Cache-Control header in the response so that browsers will be able to cache it for a maximum of `maxAgeMinutes` minutes. */
 export const setCacheControl = (res: Response, maxAgeMinutes: number) =>
-  res.set("Cache-Control", `public, max-age=${maxAgeMinutes * 60}`);
+  res.setHeader("Cache-Control", `public, max-age=${maxAgeMinutes * 60}`);
 
 function getDownloadStatus(status: number) {
   const val = DOWNLOAD_STATUS_MAP[status as keyof typeof DOWNLOAD_STATUS_MAP];
