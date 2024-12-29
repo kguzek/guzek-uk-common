@@ -35,7 +35,7 @@ export function startServer(app: Application) {
   // Catch-all 404 response for any other route
   app.all("*", (req, res) =>
     sendError(res, 404, {
-      message: `The resource at '${req.originalUrl}' was not located.`,
+      message: `The resource at '${req.path}' was not located.`,
     })
   );
 
