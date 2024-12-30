@@ -46,7 +46,9 @@ const PERMISSIONS = {
       "/auth/refresh", // Regenerate access token
     ],
     PUT: [],
-    DELETE: [],
+    DELETE: [
+      "/auth/tokens", // Log out
+    ],
     PATCH: [],
   },
   loggedInUser: {
@@ -62,7 +64,6 @@ const PERMISSIONS = {
     ],
     PUT: ["/liveseries/watched-episodes/personal"], // Modify own watched episodes
     DELETE: [
-      "/auth/tokens", // Log out
       "/liveseries/shows/personal", // Remove show from liked/subscribed list
     ],
     PATCH: [],
