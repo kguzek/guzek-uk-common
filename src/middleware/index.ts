@@ -1,5 +1,6 @@
-import { json, Request, Response } from "express";
+import { json, Request, RequestHandler, Response } from "express";
 import cors from "cors";
+import cookies from "cookie-parser";
 import { rateLimit } from "express-rate-limit";
 import { authMiddleware } from "./auth";
 import { headerMiddleware } from "./headers";
@@ -10,7 +11,7 @@ const RATE_LIMITER_CODE = 429;
 const RATE_LIMITER_STATUS =
   `${RATE_LIMITER_CODE} ${STATUS_CODES[RATE_LIMITER_CODE]}` as const;
 
-export function getMiddleware() {
+export function getMiddleware(): RequestHandler[] {
   const rateLimiterMiddleware = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 mins
     limit: 100, // 100 requests per 15 mins
@@ -29,6 +30,7 @@ export function getMiddleware() {
   return [
     cors(),
     json(),
+    cookies(),
     loggingMiddleware,
     rateLimiterMiddleware,
     headerMiddleware,
