@@ -1,6 +1,6 @@
 import { promises as fs, createReadStream } from "fs";
-import { Request, Response } from "express";
-import {
+import type { Request, Response } from "express";
+import type {
   Attributes,
   FindOptions,
   Identifier,
@@ -10,14 +10,10 @@ import {
   WhereOptions,
 } from "sequelize";
 import { getLogger } from "./logger";
-import {
-  DownloadStatus,
-  TorrentInfo,
-  Episode,
-  STATIC_CACHE_DURATION_MINS,
-} from "./models";
+import { DownloadStatus, STATIC_CACHE_DURATION_MINS } from "./models";
+import type { TorrentInfo, Episode } from "./models";
 import { Updated } from "./sequelize";
-import { MakeNullishOptional } from "sequelize/lib/utils";
+import type { MakeNullishOptional } from "sequelize/lib/utils";
 
 const logger = getLogger(__filename);
 
@@ -243,9 +239,8 @@ export async function deleteDatabaseEntry<T extends Model>(
   await updateEndpoint(model);
   if (res) {
     sendOK(res, { destroyedRows });
-  } else {
-    return destroyedRows;
   }
+  return destroyedRows;
 }
 
 export const isInvalidDate = (date: Date) => date.toString() === "Invalid Date";
@@ -279,9 +274,11 @@ export function convertTorrentInfo(info: TorrentInfo) {
   };
 }
 
+/** If `value` is not a valid natural number, returns a user-friendly error message. Otherwise returns `undefined`. */
 export function validateNaturalNumber(value: any) {
   if (!Number.isInteger(value)) return `Key '${value}' must be an integer.`;
   if (value < 0) return `Key '${value} cannot be negative.`;
+  return undefined;
 }
 
 /** Ensures that the request body is an array of non-negative integers. */

@@ -1,4 +1,5 @@
-import { Response, Router } from "express";
+import { Router } from "express";
+import type { Response } from "express";
 import { readdir, readFile } from "fs/promises";
 import { getLogger, LOG_DIRECTORY } from "../logger";
 import { isInvalidDate, sendError, sendOK, setCacheControl } from "../util";

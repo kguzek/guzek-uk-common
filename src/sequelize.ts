@@ -10,8 +10,8 @@ import {
   ForeignKey,
 } from "sequelize-typescript";
 import { getLogger } from "./logger";
-import { LatLngArr, WatchedShowData } from "./models";
-import { ModelAttributeColumnOptions } from "sequelize";
+import type { LatLngArr, WatchedShowData } from "./models";
+import type { ModelAttributeColumnOptions } from "sequelize";
 
 const logger = getLogger(__filename);
 
@@ -34,7 +34,7 @@ function NotNull(options: Partial<ModelAttributeColumnOptions> = {}) {
 @Table({})
 export class Page extends Model {
   @NotNull({ primaryKey: true, autoIncrement: true })
-  id!: number;
+  override id!: number;
   @NotNull()
   titleEn!: string;
   @NotNull()
@@ -175,7 +175,7 @@ export class WatchedEpisodes extends Model {
 @Table({})
 export class DownloadedEpisode extends Model {
   @NotNull({ primaryKey: true, autoIncrement: true })
-  id!: number;
+  override id!: number;
   @NotNull()
   showId!: number;
   @NotNull({

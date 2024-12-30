@@ -1,11 +1,6 @@
 import path from "path";
-import {
-  createLogger,
-  format,
-  Logger,
-  LoggerOptions,
-  transports,
-} from "winston";
+import { createLogger, format, Logger, transports } from "winston";
+import type { LoggerOptions } from "winston";
 import DailyRotateFile from "winston-daily-rotate-file";
 
 export const LOG_DIRECTORY = "/var/log/guzek-uk";
@@ -75,7 +70,7 @@ const colours: { level: ColourMap; message: ColourMap } = {
 };
 
 const logFormat = format.printf(
-  ({ timestamp, level, label, message, metadata }) => {
+  ({ timestamp, level, label, message /*metadata*/ }) => {
     if (typeof message !== "string") message = JSON.stringify(message);
     message = (colours.message[level] ?? "") + message + c.clear;
     level = (colours.level[level] ?? "") + level + c.clear;

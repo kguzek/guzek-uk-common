@@ -1,4 +1,4 @@
-import { Application } from "express";
+import type { Application } from "express";
 import { getLogger } from "./logger";
 import { send405, sendError } from "./util";
 import { router as healthcheckRouter } from "./routes/health";

@@ -1,9 +1,9 @@
-import { LatLng } from "./models";
+import type { LatLng } from "./models";
 
 const EARTH_RADIUS = 6371;
 
 const toRad = (degrees: number) => (Math.PI * degrees) / 180;
-const toDeg = (radians: number) => (180 * radians) / Math.PI;
+// const toDeg = (radians: number) => (180 * radians) / Math.PI;
 
 const fixLatLngType = (point: LatLng) =>
   Array.isArray(point) ? point : [point.lat, point.lng];
