@@ -38,6 +38,7 @@ const PERMISSIONS = {
     GET: [
       "/tu-lalem", // View all app coordinates
       "/auth/usernames", // View all usernames
+      "/auth/users/me", // View own user details
       "/liveseries/shows/personal", // View own liked/subscribed shows
       "/liveseries/watched-episodes/personal", // View own watched episodes
     ],
