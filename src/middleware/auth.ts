@@ -113,10 +113,20 @@ export function authMiddleware(
     sendError(res, code, { message });
   }
 
+  if (
+    req.cookies.refresh_token &&
+    (req.method !== "DELETE" || !req.path.startsWith("/auth/tokens"))
+  ) {
+    logger.warn(
+      "Unnecessary refresh token passed in request cookies. This is a security risk."
+    );
+  }
+
   const token =
     req.headers.authorization?.split(" ")?.[1] ||
-    (req.query.access_token as string | undefined);
-  if (!token) {
+    req.query.access_token ||
+    req.cookies.access_token;
+  if (!token || typeof token !== "string") {
     return reject(401, "Missing authorisation token.");
   }
 
