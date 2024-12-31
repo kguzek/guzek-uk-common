@@ -1,16 +1,12 @@
 import cors from "cors";
 
+const ALLOWED_ORIGINS = ["https://www.guzek.uk", "https://beta.guzek.uk"];
+
 export function useCors(debugMode: boolean) {
-  const allowedOrigins = debugMode
-    ? ["http://localhost:3000"]
-    : ["https://www.guzek.uk", "https://beta.guzek.uk"];
+  if (debugMode) {
+    ALLOWED_ORIGINS.push("http://localhost:3000");
+  }
   return cors({
-    origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("This origin is not allowed by CORS"));
-      }
-    },
+    origin: (origin, callback) => callback(null, !origin || ALLOWED_ORIGINS),
   });
 }
