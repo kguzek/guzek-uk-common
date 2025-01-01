@@ -11,6 +11,11 @@ export function useCors(debugMode: boolean) {
     ALLOWED_ORIGINS.push("http://localhost:3000");
   }
   return cors({
-    origin: (origin, callback) => callback(null, !origin || ALLOWED_ORIGINS),
+    origin: (origin, callback) =>
+      callback(
+        null,
+        !origin ||
+          ALLOWED_ORIGINS.find((allowedOrigin) => origin === allowedOrigin)
+      ),
   });
 }
