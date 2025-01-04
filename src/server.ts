@@ -39,5 +39,20 @@ export function startServer(app: Application) {
     })
   );
 
-  app.listen(port, () => logger.info(`API listening on port ${port}.`));
+  const server = app.listen(port, () =>
+    logger.info(`API listening on port ${port}.`)
+  );
+
+  // Gracefully shut down on SIGTERM (sent by Docker when you run `docker compose down`)
+  process.on("SIGTERM", () => {
+    logger.info("Received SIGTERM. Closing server...");
+    server.close((error) => {
+      if (error) {
+        logger.error(`Attempted to close a server that was not open: ${error}`);
+        process.exit(1);
+      }
+      logger.info("Server exited gracefully.");
+      process.exit(0);
+    });
+  });
 }
