@@ -84,8 +84,6 @@ export interface Episode {
   air_date: string;
 }
 
-export const TORRENT_DOWNLOAD_PATH = "/var/lib/transmission-daemon/downloads/";
-
 export const TORRENT_STATUSES = [
   "Stopped",
   "Unknown status 1",
