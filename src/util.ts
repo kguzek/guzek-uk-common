@@ -326,7 +326,7 @@ export async function sendFileStream(
     return;
   }
 
-  if (fileExtension === "mkv") {
+  if (fileExtension !== "mp4") {
     filename += ".mp4";
     try {
       await fs.access(filename);
