@@ -294,7 +294,7 @@ export function validateNaturalList(list: any, res: Response) {
 }
 
 const getVideoExtension = (filename: string) =>
-  filename.match(/\.(mkv|mp4)$/)?.[1];
+  filename.match(/\.(mkv|mp4|avi)$/)?.[1];
 
 export async function sendFileStream(
   req: Request,
@@ -309,7 +309,7 @@ export async function sendFileStream(
     try {
       filenames = await fs.readdir(filename);
     } catch (error) {
-      logger.error(`Could not read reictory '${filename}':`, error);
+      logger.error(`Could not read directory '${filename}':`, error);
       sendError(res, 404, { message: `The path '${path}' was not found.` });
       return;
     }
