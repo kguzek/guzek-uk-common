@@ -309,6 +309,7 @@ export async function sendFileStream(
     try {
       filenames = await fs.readdir(filename);
     } catch (error) {
+      logger.error(`Could not read reictory '${filename}':`, error);
       sendError(res, 404, { message: `The path '${path}' was not found.` });
       return;
     }
