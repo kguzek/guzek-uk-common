@@ -120,7 +120,10 @@ const loggerOptions: CustomLoggerOptions = {
   ),
   transports: [defaultFileTransport, errorFileTransport],
 };
-if (process.env.NODE_ENV === "development") {
+if (
+  process.env.NODE_ENV === "development" ||
+  process.env.LOG_TO_CONSOLE === "true"
+) {
   loggerOptions.level = "debug";
   // Special options for when running from a development environment
   const consoleTransport = new transports.Console({
