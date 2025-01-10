@@ -82,37 +82,37 @@ const isError = (metadata: any): metadata is { stack: string } =>
 const containsIp = (metadata: any): metadata is { ip: string } =>
   typeof (metadata as any).ip === "string";
 
-const logFormat = format.printf(
-  ({ timestamp, level, label, message, metadata }) => {
-    if (typeof message !== "string") message = JSON.stringify(message);
-    message = `${COLORS.message[level] ?? ""}${
-      message || `${C.reverse}(empty message)`
-    }${C.clear}`;
-    const formattedLevel = (COLORS.level[level] ?? "") + level + C.clear;
-    const metaProvided = metadata != null && Object.keys(metadata).length > 0;
-    let meta = "";
-    const prettyMeta = `\n${JSON.stringify(metadata, undefined, 2)}`;
-    let ip = "";
-    if (metaProvided) {
-      switch (level as keyof typeof LOG_LEVELS) {
-        case "error":
-          meta = isError(metadata) ? `\n${metadata.stack}` : prettyMeta;
-          break;
-        case "request":
-        case "response":
-          if (containsIp(metadata)) {
-            ip = ` (${C.underscore}${C.fg.black}${metadata.ip}${C.clear})`;
-          }
-          break;
-        default:
-          meta = prettyMeta;
-          break;
-      }
+const logFormat = format.printf(({ timestamp, level, message, metadata }) => {
+  if (typeof message !== "string") message = JSON.stringify(message);
+  message = `${COLORS.message[level] ?? ""}${
+    message || `${C.reverse}(empty message)`
+  }${C.clear}`;
+  const formattedLevel = (COLORS.level[level] ?? "") + level + C.clear;
+  let filename;
+  ({ filename, ...metadata } = metadata as Record<string, any>);
+  const metaProvided = metadata != null && Object.keys(metadata).length > 0;
+  let meta = "";
+  const prettyMeta = `\n${JSON.stringify(metadata, null, 2)}`;
+  let ip = "";
+  if (metaProvided) {
+    switch (level as keyof typeof LOG_LEVELS) {
+      case "error":
+        meta = isError(metadata) ? `\n${metadata.stack}` : prettyMeta;
+        break;
+      case "request":
+      case "response":
+        if (containsIp(metadata)) {
+          ip = ` (${C.underscore}${C.fg.black}${metadata.ip}${C.clear})`;
+        }
+        break;
+      default:
+        meta = prettyMeta;
+        break;
     }
-
-    return `${C.dim}${timestamp}${C.clear} ${formattedLevel} [${C.fg.blue}${label}${C.clear}]${ip}: ${message}${meta}`;
   }
-);
+
+  return `${C.dim}${timestamp}${C.clear} ${formattedLevel} [${C.fg.blue}${filename}${C.clear}]${ip}: ${message}${meta}`;
+});
 
 const jsonFormat = format.combine(format.json());
 
@@ -145,6 +145,8 @@ const baseLogger = createLogger({
   transports: [defaultFileTransport, errorFileTransport],
 }) as CustomLogger;
 
+let consoleTransportAdded = false;
+
 /** Gets the logger instance for the given source code file.
  *
  * @param filename The name of the source code file to create a logger for.
@@ -155,17 +157,14 @@ const baseLogger = createLogger({
  * logger.error("This is an error message.", new Error("An error occurred."));
  */
 export function getLogger(filename: string) {
-  const logger = baseLogger.child({
-    format: format.combine(
-      format.label({ label: path.basename(filename) }),
-      baseLogger.format
-    ),
-  });
+  const label = path.basename(filename);
+  const logger = baseLogger.child({ filename: label });
 
   const useConsoleTransport =
     debugMode || process.env.LOG_TO_CONSOLE === "true";
 
-  if (useConsoleTransport) {
+  if (useConsoleTransport && !consoleTransportAdded) {
+    consoleTransportAdded = true;
     logger.add(
       new transports.Console({
         format: format.combine(logFormat),
