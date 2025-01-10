@@ -19,9 +19,9 @@ export function getRootDirectory() {
 export function setupEnvironment(isDecentralised: boolean = false): boolean {
   const appDirectory = getRootDirectory();
   const debugMode = process.env.NODE_ENV === "development";
-  // In production mode, this code is run from /api/v1/dist/index.js
-  // In development mode, it is in /api/v1/index.ts
-  // The env file is in /api/.env, so adjust accordingly
+  // In production mode, this code is run from /dist/index.js
+  // In development mode, it is in /index.ts
+  // The env file is in /.env, so adjust accordingly
   const ENV_FILE_PATH = debugMode ? ".env" : "../.env";
   const dotEnvPath = resolve(appDirectory, ENV_FILE_PATH);
   dotenv.config({ path: dotEnvPath });
@@ -29,6 +29,9 @@ export function setupEnvironment(isDecentralised: boolean = false): boolean {
   if (debugMode) {
     // Add newline before app output for readability
     console.log();
+  } else {
+    // Attempt to load the production .env file from /dist, just in case
+    dotenv.config();
   }
 
   initialiseSequelize(debugMode, isDecentralised);
