@@ -130,35 +130,47 @@ const errorFileTransport = new transports.File({
   format: jsonFormat,
 });
 
-/** Gets the logger instance for the given source code file. */
+const debugMode = process.env.NODE_ENV === "development";
+
+const baseLogger = createLogger({
+  level: debugMode ? "debug" : "info",
+  levels: LOG_LEVELS,
+  format: format.combine(
+    format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
+    // Format the metadata object
+    format.metadata({
+      fillExcept: ["message", "level", "timestamp", "label"],
+    })
+  ),
+  transports: [defaultFileTransport, errorFileTransport],
+}) as CustomLogger;
+
+/** Gets the logger instance for the given source code file.
+ *
+ * @param filename The name of the source code file to create a logger for.
+ * @returns The logger instance for the given source code file.
+ * @example
+ * const logger = getLogger(__filename);
+ * logger.info("This is an info message.");
+ * logger.error("This is an error message.", new Error("An error occurred."));
+ */
 export function getLogger(filename: string) {
-  const debugMode = process.env.NODE_ENV === "development";
+  const logger = baseLogger.child({
+    format: format.combine(
+      format.label({ label: path.basename(filename) }),
+      baseLogger.format
+    ),
+  });
+
   const useConsoleTransport =
     debugMode || process.env.LOG_TO_CONSOLE === "true";
 
-  return createLogger({
-    level: debugMode ? "debug" : "info",
-    levels: LOG_LEVELS,
-    format: format.combine(
-      format.label({ label: path.basename(filename) }),
-      format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
-      // Format the metadata object
-      format.metadata({
-        fillExcept: ["message", "level", "timestamp", "label"],
+  if (useConsoleTransport) {
+    logger.add(
+      new transports.Console({
+        format: format.combine(logFormat),
       })
-    ),
-    transports: [
-      defaultFileTransport,
-      errorFileTransport,
-      ...(useConsoleTransport
-        ? [
-            new transports.Console({
-              format: logFormat,
-            }),
-          ]
-        : []),
-    ],
-  }) as CustomLogger;
+    );
+  }
+  return logger;
 }
-
-process.setMaxListeners(15);
