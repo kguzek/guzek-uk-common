@@ -24,10 +24,15 @@ function getServerPort() {
   return portInt;
 }
 
-/** Starts the server on the specified port, and registers a catch-all 404 route. */
+/**
+ * Starts the server on the specified port, and registers a catch-all 404 route.
+ *
+ * @param app The Express application to start the server on.
+ * @returns True if the server was started successfully, false otherwise.
+ */
 export function startServer(app: Application) {
   const port = getServerPort();
-  if (!port) return;
+  if (!port) return false;
 
   app.use("/health", healthcheckRouter, send405);
   app.use("/logs", logRouter, send405);
@@ -55,4 +60,5 @@ export function startServer(app: Application) {
       process.exit(0);
     });
   });
+  return true;
 }

@@ -70,6 +70,7 @@ const COLORS: Record<"level" | "message", Record<string, string>> = {
     debug: C.fg.cyan,
   },
   message: {
+    crit: C.bg.red + C.bright,
     error: C.fg.red + C.bright,
     warn: C.fg.yellow + C.bright,
   },
