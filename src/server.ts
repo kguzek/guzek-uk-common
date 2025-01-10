@@ -21,6 +21,7 @@ function getServerPort() {
     logger.crit("NODE_PORT is set to an invalid port number.");
     return null;
   }
+  logger.close();
   return portInt;
 }
 
