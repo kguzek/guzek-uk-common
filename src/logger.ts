@@ -1,11 +1,10 @@
 import path from "path";
 import { createLogger, format, Logger, transports } from "winston";
-import type { LoggerOptions } from "winston";
 import DailyRotateFile from "winston-daily-rotate-file";
 
 export const LOG_DIRECTORY = "/var/log/guzek-uk";
 
-const c = {
+const C = {
   clear: "\x1b[0m",
   bright: "\x1b[1m",
   dim: "\x1b[2m",
@@ -23,6 +22,7 @@ const c = {
     magenta: "\x1b[35m",
     cyan: "\x1b[36m",
     white: "\x1b[37m",
+    orange: "\x1b[38;5;208m",
   },
 
   bg: {
@@ -34,48 +34,82 @@ const c = {
     magenta: "\x1b[45m",
     cyan: "\x1b[46m",
     white: "\x1b[47m",
+    orange: "\x1b[48;5;208m",
   },
 };
 
-interface CustomLoggerOptions extends LoggerOptions {
-  transports: Array<
-    | transports.FileTransportInstance
-    | transports.ConsoleTransportInstance
-    | DailyRotateFile
-  >;
-}
-
-type LogFunction = (message: string, metadata?: Record<string, any>) => void;
+type LogFunction = (message: string, ...meta: any[]) => Logger;
 
 interface CustomLogger extends Logger {
   request: LogFunction;
   response: LogFunction;
 }
 
-type ColourMap = { [logLevel: string]: string };
+const LOG_LEVELS = {
+  crit: 0,
+  error: 1,
+  warn: 2,
+  info: 3,
+  response: 4,
+  request: 5,
+  http: 6,
+  verbose: 7,
+  debug: 8,
+} as const;
 
-const colours: { level: ColourMap; message: ColourMap } = {
+const COLORS: Record<"level" | "message", Record<string, string>> = {
   level: {
-    error: c.bg.red,
-    warn: c.bg.yellow + c.fg.black,
-    response: c.bg.magenta + c.fg.black,
-    request: c.fg.magenta,
-    info: c.fg.green,
-    debug: c.fg.cyan,
+    crit: C.fg.red,
+    error: C.bg.red,
+    warn: C.bg.yellow + C.fg.black,
+    info: C.fg.green,
+    response: C.bg.magenta + C.fg.black,
+    request: C.fg.magenta,
+    http: C.fg.orange,
+    verbose: C.fg.yellow,
+    debug: C.fg.cyan,
   },
   message: {
-    error: c.fg.red + c.bright,
-    warn: c.fg.yellow + c.bright,
+    error: C.fg.red + C.bright,
+    warn: C.fg.yellow + C.bright,
   },
 };
 
+const isError = (metadata: any): metadata is { stack: string } =>
+  Object.keys(metadata === 1) && "stack" in metadata;
+
+const containsIp = (metadata: any): metadata is { ip: string } =>
+  typeof (metadata as any).ip === "string";
+
 const logFormat = format.printf(
-  ({ timestamp, level, label, message /*metadata*/ }) => {
+  ({ timestamp, level, label, message, metadata }) => {
     if (typeof message !== "string") message = JSON.stringify(message);
-    message = (colours.message[level] ?? "") + message + c.clear;
-    level = (colours.level[level] ?? "") + level + c.clear;
-    label = c.fg.blue + label + c.clear;
-    return `${c.dim + timestamp + c.clear} ${level} [${label}]: ${message}`;
+    message = `${COLORS.message[level] ?? ""}${
+      message || `${C.reverse}(empty message)`
+    }${C.clear}`;
+    const formattedLevel = (COLORS.level[level] ?? "") + level + C.clear;
+    const metaProvided = metadata != null && Object.keys(metadata).length > 0;
+    let meta = "";
+    const prettyMeta = `\n${JSON.stringify(metadata, undefined, 2)}`;
+    let ip = "";
+    if (metaProvided) {
+      switch (level as keyof typeof LOG_LEVELS) {
+        case "error":
+          meta = isError(metadata) ? `\n${metadata.stack}` : prettyMeta;
+          break;
+        case "request":
+        case "response":
+          if (containsIp(metadata)) {
+            ip = ` (${C.underscore}${C.fg.black}${metadata.ip}${C.clear})`;
+          }
+          break;
+        default:
+          meta = prettyMeta;
+          break;
+      }
+    }
+
+    return `${C.dim}${timestamp}${C.clear} ${formattedLevel} [${C.fg.blue}${label}${C.clear}]${ip}: ${message}${meta}`;
   }
 );
 
@@ -95,52 +129,33 @@ const errorFileTransport = new transports.File({
   format: jsonFormat,
 });
 
-const LOG_LEVELS = {
-  error: 0,
-  warn: 1,
-  response: 2,
-  request: 3,
-  info: 4,
-  debug: 5,
-} as const;
-
-// Idk this magic got it from stackoverflow
-// https://stackoverflow.com/a/56091110/15757366
-
-const loggerOptions: CustomLoggerOptions = {
-  level: "info",
-  levels: LOG_LEVELS,
-  format: format.combine(
-    // format.label({ label: path.basename(filename) }),
-    format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
-    // Format the metadata object
-    format.metadata({
-      fillExcept: ["message", "level", "timestamp", "label"],
-    })
-  ),
-  transports: [defaultFileTransport, errorFileTransport],
-};
-if (
-  process.env.NODE_ENV === "development" ||
-  process.env.LOG_TO_CONSOLE === "true"
-) {
-  loggerOptions.level = "debug";
-  // Special options for when running from a development environment
-  const consoleTransport = new transports.Console({
-    format: logFormat,
-  });
-  loggerOptions.transports.push(consoleTransport);
-}
-const baseLogger = createLogger(loggerOptions);
-
 /** Gets the logger instance for the given source code file. */
 export function getLogger(filename: string) {
-  const label = path.basename(filename);
-  return Object.fromEntries(
-    Object.keys(LOG_LEVELS).map((level) => [
-      level,
-      (message: any, metadata?: any) =>
-        baseLogger[level as keyof Logger](message, { ...metadata, label }),
-    ])
-  ) as unknown as CustomLogger;
+  const debugMode = process.env.NODE_ENV === "development";
+  const useConsoleTransport =
+    debugMode || process.env.LOG_TO_CONSOLE === "true";
+
+  return createLogger({
+    level: debugMode ? "debug" : "info",
+    levels: LOG_LEVELS,
+    format: format.combine(
+      format.label({ label: path.basename(filename) }),
+      format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
+      // Format the metadata object
+      format.metadata({
+        fillExcept: ["message", "level", "timestamp", "label"],
+      })
+    ),
+    transports: [
+      defaultFileTransport,
+      errorFileTransport,
+      ...(useConsoleTransport
+        ? [
+            new transports.Console({
+              format: logFormat,
+            }),
+          ]
+        : []),
+    ],
+  }) as CustomLogger;
 }
