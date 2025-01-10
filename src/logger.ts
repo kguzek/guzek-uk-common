@@ -160,3 +160,5 @@ export function getLogger(filename: string) {
     ],
   }) as CustomLogger;
 }
+
+process.setMaxListeners(15);

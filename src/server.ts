@@ -6,22 +6,24 @@ import { router as logRouter } from "./routes/logs";
 
 const logger = getLogger(__filename);
 
+function closeServer(message: string) {
+  logger.crit(message);
+  logger.close();
+  return null;
+}
+
 function getServerPort() {
   const port = process.env.NODE_PORT;
   if (port == null || port === "") {
-    logger.crit("No NODE_PORT environment variable set.");
-    return null;
+    return closeServer("No NODE_PORT environment variable set.");
   }
   if (!/^\d+$/.test(port)) {
-    logger.crit("NODE_PORT is set to a non-integer value.");
-    return null;
+    return closeServer("NODE_PORT is set to a non-integer value.");
   }
   const portInt = +port;
   if (portInt < 0 || portInt > 65535) {
-    logger.crit("NODE_PORT is set to an invalid port number.");
-    return null;
+    return closeServer("NODE_PORT is set to an invalid port number.");
   }
-  logger.close();
   return portInt;
 }
 
@@ -54,10 +56,11 @@ export function startServer(app: Application) {
     logger.info("Received SIGTERM. Closing server...");
     server.close((error) => {
       if (error) {
-        logger.crit(`Attempted to close a server that was not open: ${error}`);
+        closeServer(`Attempted to close a server that was not open: ${error}`);
         process.exit(1);
       }
       logger.info("Server exited gracefully.");
+      logger.close();
       process.exit(0);
     });
   });
