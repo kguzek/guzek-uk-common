@@ -12,7 +12,7 @@
     "clean": "rm -r dist guzek-uk-common-*.tgz",
     "build": "npm run clean; tsc && npm pack",
     "release": "npm publish --access public",
-    "deploy": "npm run build && npm run release"
+    "deploy": "npm run build && npm run release && npm i"
   },
   "repository": {
     "type": "git",
