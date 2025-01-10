@@ -11,48 +11,69 @@ const logger = getLogger(__filename);
 // If false, allows requests with expired access tokens to go through
 const VERIFY_TOKEN_EXPIRY = true;
 
-const PERMISSIONS = {
-  anonymous: {
-    GET: [
-      "/pages", // View all pages
-      "/updated", // View site updates
-      "/liveseries/downloaded-episodes/ws/.websocket", // LiveSeries downloaded episode info
-      "/liveseries/video", // Stream downloaded LiveSeries episode
-      "/liveseries/subtitles", // Fetch episode subtitles
-      "/torrents", // Search for torrents using scraper
-      "/.well-known", // JWKS for JWT
-      "/health", // Health check
-    ],
-    POST: [
-      "/auth/users", // Sign up
-      "/auth/tokens", // Log in
-      "/auth/refresh", // Regenerate access token
-    ],
-    PUT: [],
-    DELETE: [
-      "/auth/tokens", // Log out
-    ],
-    PATCH: [],
-  },
-  loggedInUser: {
-    GET: [
-      "/tu-lalem", // View all app coordinates
-      "/auth/usernames", // View all usernames
-      "/auth/users/me", // View own user details
-      "/liveseries/shows/personal", // View own liked/subscribed shows
-      "/liveseries/watched-episodes/personal", // View own watched episodes
-    ],
-    POST: [
-      "/tu-lalem", // Submit app coordinates
-      "/liveseries/shows/personal", // Add show to liked/subscribed list
-    ],
-    PUT: ["/liveseries/watched-episodes/personal"], // Modify own watched episodes
-    DELETE: [
-      "/liveseries/shows/personal", // Remove show from liked/subscribed list
-    ],
-    PATCH: [],
-  },
-} as const;
+enum AccessLevel {
+  anonymous = "anonymous",
+  authenticatedUser = "authenticatedUser",
+}
+
+const INITIAL_ACCESS_MAP: Record<AccessLevel, boolean> = {
+  anonymous: false,
+  authenticatedUser: false,
+};
+
+const PERMISSIONS: [AccessLevel, Record<RequestMethod, string[]>][] = [
+  [
+    AccessLevel.anonymous,
+    {
+      GET: [
+        "/pages", // View all pages
+        "/updated", // View site updates
+        "/liveseries/downloaded-episodes/ws/.websocket", // LiveSeries downloaded episode info
+        "/liveseries/video", // Stream downloaded LiveSeries episode
+        "/liveseries/subtitles", // Fetch episode subtitles
+        "/torrents", // Search for torrents using scraper
+        "/.well-known", // JWKS for JWT
+        "/health", // Health check
+      ],
+      POST: [
+        "/auth/users", // Sign up
+        "/auth/tokens", // Log in
+        "/auth/refresh", // Regenerate access token
+      ],
+      PUT: [],
+      DELETE: [
+        "/auth/tokens", // Log out
+      ],
+      PATCH: [],
+    },
+  ],
+  [
+    AccessLevel.authenticatedUser,
+    {
+      GET: [
+        "/tu-lalem", // View all app coordinates
+        "/auth/usernames", // View all usernames
+        "/auth/users/me", // View own user details
+        "/liveseries/shows/personal", // View own liked/subscribed shows
+        "/liveseries/watched-episodes/personal", // View own watched episodes
+      ],
+      POST: [
+        "/tu-lalem", // Submit app coordinates
+        "/liveseries/shows/personal", // Add show to liked/subscribed list
+      ],
+      PUT: [
+        "/liveseries/watched-episodes/personal", // Modify own watched episodes
+        "/auth/users/me", // Modify own user details
+      ],
+      DELETE: [
+        "/liveseries/shows/personal", // Remove show from liked/subscribed list
+      ],
+      PATCH: [
+        "/auth/users/me", // Modify own user details
+      ],
+    },
+  ],
+] as const;
 
 export function auth(debugMode: boolean) {
   // Allows all requests to go through, even if JWT authentication fails.
@@ -83,17 +104,14 @@ export function auth(debugMode: boolean) {
   }
 
   return function (req: CustomRequest, res: Response, next: NextFunction) {
-    const endpointAccessibleBy = {
-      anonymous: false,
-      loggedInUser: false,
-    };
+    const endpointAccessibleBy = INITIAL_ACCESS_MAP;
     // Check if the current endpoint is accessible using the request method to anonymous or logged in users
-    for (const [level, routes] of Object.entries(PERMISSIONS)) {
+    for (const [level, routes] of PERMISSIONS) {
       const method =
         req.method === "HEAD" ? "GET" : (req.method as RequestMethod);
       const endpoints = routes[method] ?? [];
-      endpointAccessibleBy[level as keyof typeof PERMISSIONS] = endpoints.some(
-        (endpoint) => req.path.startsWith(endpoint)
+      endpointAccessibleBy[level] = endpoints.some((endpoint) =>
+        req.path.startsWith(endpoint)
       );
     }
 
@@ -140,7 +158,7 @@ export function auth(debugMode: boolean) {
       if (VERIFY_TOKEN_EXPIRY && new Date().getTime() > exp) {
         return reject(401, "Access token is expired.");
       }
-      if (endpointAccessibleBy.loggedInUser || req.user?.admin) {
+      if (endpointAccessibleBy.authenticatedUser || req.user?.admin) {
         return void next();
       }
       // Allow user to edit own details
