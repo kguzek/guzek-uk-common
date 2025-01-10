@@ -147,7 +147,7 @@ export function auth(debugMode: boolean) {
 
     jwt.verify(token, getKey, (err, user) => {
       if (err) {
-        logger.error(err);
+        logger.error("Error verifying token:", err);
         return reject(401, "Invalid authorisation token.");
       }
       const { iat, exp, ...userDetails } = user as UserObj & {

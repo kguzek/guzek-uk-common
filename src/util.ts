@@ -55,7 +55,7 @@ export async function updateEndpoint<T extends Model>(
   } else {
     await Updated.create({ endpoint, ...newValue });
   }
-  logger.debug(`Updated endpoint '${endpoint}'`);
+  logger.verbose(`Updated endpoint '${endpoint}'`);
 }
 
 export const logResponse = (res: Response, message: string) =>
@@ -114,7 +114,7 @@ export async function createDatabaseEntry<T extends Model>(
         sendError(res, 400, {
           message: "Cannot create duplicate entries.",
         });
-    logger.error("Error while creating database entry: " + error);
+    logger.error("Error while creating database entry:", error);
     if (res) sendError(res, 500, error as Error);
     return false;
   }

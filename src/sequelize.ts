@@ -238,9 +238,8 @@ export async function initialiseSequelize(
     return error as Error;
   }
 
-  logger.debug("Database connection established successfully.");
+  logger.verbose("Database connection established successfully.");
 
-  // Sync models (if needed)
   if (debugMode) {
     await sequelize.sync();
   }

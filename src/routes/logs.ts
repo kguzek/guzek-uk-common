@@ -19,11 +19,12 @@ async function getLogFilenames(path: string = "") {
 }
 
 async function sendLogFile(res: Response, filename: string) {
+  const file = `${LOG_DIRECTORY}/${filename}.log`;
   let buffer: Buffer;
   try {
-    buffer = await readFile(`${LOG_DIRECTORY}/${filename}.log`);
+    buffer = await readFile(file);
   } catch (error) {
-    logger.error(error);
+    logger.error(`Error reading log file '${file}':`, error);
     return sendError(res, 500, error as Error);
   }
   const logStrings = buffer.toString().split("\n");
