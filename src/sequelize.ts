@@ -239,7 +239,6 @@ export async function initialiseSequelize(
   }
 
   logger.verbose("Database connection established successfully.");
-  logger.close();
 
   if (debugMode) {
     await sequelize.sync();

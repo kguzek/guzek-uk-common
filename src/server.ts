@@ -8,7 +8,6 @@ const logger = getLogger(__filename);
 
 function closeServer(message: string) {
   logger.crit(message);
-  logger.close();
   return null;
 }
 
@@ -60,7 +59,6 @@ export function startServer(app: Application) {
         process.exit(1);
       }
       logger.info("Server exited gracefully.");
-      logger.close();
       process.exit(0);
     });
   });
