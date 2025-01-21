@@ -6,7 +6,7 @@ import { router as logRouter } from "../routes/logs";
 
 const logger = getLogger(__filename);
 
-const send405 = (req: Request, res: Response) =>
+export const send405 = (req: Request, res: Response) =>
   sendError(res, 405, {
     message: `You cannot ${req.method.toUpperCase()} the resource at '${
       req.path

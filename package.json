@@ -1,6 +1,6 @@
 {
   "name": "guzek-uk-common",
-  "version": "3.0.0",
+  "version": "3.0.5",
   "description": "1 repository of common libraries and utilities for the Guzek UK Website. ",
   "author": "Konrad Guzek",
   "homepage": "https://github.com/kguzek/guzek-uk-common#readme",
@@ -10,7 +10,7 @@
   },
   "scripts": {
     "clean": "rm -r dist guzek-uk-common-*.tgz",
-    "build": "npm run clean; tsc && npm pack",
+    "build": "npm i; npm run clean; tsc && npm pack",
     "release": "npm publish --access public",
     "deploy": "npm run build && npm run release && npm i"
   },
@@ -21,6 +21,14 @@
   "bugs": {
     "url": "https://github.com/kguzek/guzek-uk-common/issues"
   },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./dist/*",
+        "./dist/*/index.d.ts"
+      ]
+    }
+  },
   "exports": {
     "./lib/*": "./dist/lib/*.js",
     "./middleware": "./dist/middleware/index.js",
@@ -28,7 +36,7 @@
     "./models": "./dist/models.js"
   },
   "files": [
-    "dist",
+    "dist/*",
     "LICENSE",
     "README.md"
   ],
