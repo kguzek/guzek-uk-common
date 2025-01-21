@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { sendOK } from "../util";
+import { sendOK } from "../lib/http";
 
 export const router = Router();
 

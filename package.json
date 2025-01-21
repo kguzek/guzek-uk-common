@@ -1,12 +1,12 @@
 {
   "name": "guzek-uk-common",
-  "version": "2.1.12",
+  "version": "3.0.0",
   "description": "1 repository of common libraries and utilities for the Guzek UK Website. ",
   "author": "Konrad Guzek",
   "homepage": "https://github.com/kguzek/guzek-uk-common#readme",
   "license": "AGPL-3.0-only",
   "engines": {
-    "node": ">=22.3.0"
+    "node": "^22.3.0"
   },
   "scripts": {
     "clean": "rm -r dist guzek-uk-common-*.tgz",
@@ -21,43 +21,11 @@
   "bugs": {
     "url": "https://github.com/kguzek/guzek-uk-common/issues"
   },
-  "typesVersions": {
-    "*": {
-      "middleware": [
-        "dist/middleware/index.d.ts"
-      ],
-      "logger": [
-        "dist/logger.d.ts"
-      ],
-      "maths": [
-        "dist/maths.d.ts"
-      ],
-      "models": [
-        "dist/models.d.ts"
-      ],
-      "sequelize": [
-        "dist/sequelize.d.ts"
-      ],
-      "server": [
-        "dist/server.d.ts"
-      ],
-      "setup": [
-        "dist/setup.d.ts"
-      ],
-      "util": [
-        "dist/util.d.ts"
-      ]
-    }
-  },
   "exports": {
+    "./lib/*": "./dist/lib/*.js",
     "./middleware": "./dist/middleware/index.js",
-    "./logger": "./dist/logger.js",
-    "./maths": "./dist/maths.js",
-    "./models": "./dist/models.js",
-    "./sequelize": "./dist/sequelize.js",
-    "./server": "./dist/server.js",
-    "./setup": "./dist/setup.js",
-    "./util": "./dist/util.js"
+    "./enums": "./dist/enums.js",
+    "./models": "./dist/models.js"
   },
   "files": [
     "dist",
@@ -70,7 +38,6 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "express-rate-limit": "^7.5.0",
-    "fs": "^0.0.1-security",
     "jsonwebtoken": "^9.0.2",
     "jwks-rsa": "^3.1.0",
     "mysql2": "^3.11.5",

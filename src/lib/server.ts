@@ -1,10 +1,17 @@
-import type { Application } from "express";
+import type { Application, Request, Response } from "express";
 import { getLogger } from "./logger";
-import { send405, sendError } from "./util";
-import { router as healthcheckRouter } from "./routes/health";
-import { router as logRouter } from "./routes/logs";
+import { sendError } from "./http";
+import { router as healthcheckRouter } from "../routes/health";
+import { router as logRouter } from "../routes/logs";
 
 const logger = getLogger(__filename);
+
+const send405 = (req: Request, res: Response) =>
+  sendError(res, 405, {
+    message: `You cannot ${req.method.toUpperCase()} the resource at '${
+      req.path
+    }'.`,
+  });
 
 function closeServer(message: string) {
   logger.crit(message);

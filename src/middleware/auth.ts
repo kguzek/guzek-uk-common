@@ -1,10 +1,14 @@
 import type { NextFunction, Response } from "express";
 import jwt from "jsonwebtoken";
 import { JwksClient } from "jwks-rsa";
-import { getLogger } from "../logger";
-import { sendError } from "../util";
-import type { StatusCode } from "../util";
-import type { CustomRequest, RequestMethod, UserObj } from "../models";
+import { getLogger } from "../lib/logger";
+import { sendError } from "../lib/http";
+import type {
+  CustomRequest,
+  RequestMethod,
+  StatusCode,
+  UserObj,
+} from "../models";
 
 const logger = getLogger(__filename);
 

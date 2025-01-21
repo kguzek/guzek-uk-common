@@ -10,7 +10,7 @@ import {
   ForeignKey,
 } from "sequelize-typescript";
 import { getLogger } from "./logger";
-import type { LatLngArr, WatchedShowData } from "./models";
+import type { LatLngArray, WatchedShowData } from "../models";
 import type { ModelAttributeColumnOptions } from "sequelize";
 
 const logger = getLogger(__filename);
@@ -128,7 +128,7 @@ export class TuLalem extends Model {
       return [lat, lng];
     },
   })
-  coordinates!: LatLngArr;
+  coordinates!: LatLngArray;
   @BelongsTo(() => User)
   user!: User;
 }

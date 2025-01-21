@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import rateLimit from "express-rate-limit";
-import { logResponse, STATUS_CODES } from "../util";
+import { STATUS_CODES } from "../enums";
+import { logResponse } from "../lib/http";
 
 const RATE_LIMITER_CODE = 429;
 const RATE_LIMITER_STATUS =

@@ -1,4 +1,4 @@
-import type { LatLng } from "./models";
+import type { LatLng } from "../models";
 
 const EARTH_RADIUS = 6371;
 

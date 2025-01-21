@@ -1,7 +1,20 @@
 import type { Request } from "express";
-import { convertTorrentInfo } from "./util";
+import { convertTorrentInfo } from "./lib/util";
+import {
+  CLIENT_ERROR_STATUS_CODES,
+  SERVER_ERROR_STATUS_CODES,
+  SUCCESS_STATUS_CODES,
+} from "./enums";
 
 export type RequestMethod = "GET" | "PUT" | "POST" | "DELETE" | "PATCH";
+
+export type SuccessStatusCode = keyof typeof SUCCESS_STATUS_CODES;
+export type ClientErrorStatusCode = keyof typeof CLIENT_ERROR_STATUS_CODES;
+export type ServerErrorStatusCode = keyof typeof SERVER_ERROR_STATUS_CODES;
+export type StatusCode =
+  | SuccessStatusCode
+  | ClientErrorStatusCode
+  | ServerErrorStatusCode;
 
 export interface RecipientData {
   name: string;
@@ -26,16 +39,9 @@ export interface Order {
   recipientData: RecipientData;
 }
 
-export const ORDER_ATTRIBUTES = [
-  "id",
-  "contentDesc",
-  "cost",
-  "recipientData",
-] as (keyof Order)[];
-
-export type LatLngObj = { lat: number; lng: number };
-export type LatLngArr = [number, number];
-export type LatLng = LatLngObj | LatLngArr;
+export type LatLngObject = { lat: number; lng: number };
+export type LatLngArray = [number, number];
+export type LatLng = LatLngObject | LatLngArray;
 
 export interface UserObj {
   uuid: string;
@@ -57,15 +63,6 @@ export interface TorrentInfo {
   percentDone?: number;
 }
 
-export const DownloadStatus = {
-  STOPPED: 1,
-  PENDING: 2,
-  COMPLETE: 3,
-  FAILED: 4,
-  UNKNOWN: 5,
-  VERIFYING: 6,
-};
-
 type WatchedData = { [season: string]: number[] };
 
 export type WatchedShowData = { [showId: string]: WatchedData };
@@ -84,16 +81,6 @@ export interface Episode {
   air_date: string;
 }
 
-export const TORRENT_STATUSES = [
-  "Stopped",
-  "Unknown status 1",
-  "Verifying",
-  "Unknown status 3",
-  "Downloading",
-  "Unknown status 5",
-  "Idle/Seeding",
-];
-
 export type ConvertedTorrentInfo = ReturnType<typeof convertTorrentInfo>;
 
 export type BasicEpisode = Pick<
@@ -105,5 +92,3 @@ export interface BasicTvShow {
   showName: string;
   showId: number;
 }
-
-export const STATIC_CACHE_DURATION_MINS = 30 * 24 * 60; // 30 days in minutes
