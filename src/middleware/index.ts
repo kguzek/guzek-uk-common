@@ -1,4 +1,4 @@
-import { json } from "express";
+import { json, urlencoded } from "express";
 import type { RequestHandler } from "express";
 import cookies from "cookie-parser";
 import { auth } from "./auth";
@@ -11,6 +11,7 @@ import { useMethodOverride } from "./method-override";
 export const getMiddleware = (debugMode: boolean): RequestHandler[] => [
   useCors(debugMode),
   json(),
+  urlencoded({ extended: true }),
   cookies(),
   useMethodOverride,
   loggingMiddleware,
