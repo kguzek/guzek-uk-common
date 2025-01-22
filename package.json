@@ -1,6 +1,6 @@
 {
   "name": "guzek-uk-common",
-  "version": "3.1.1",
+  "version": "3.2.0",
   "description": "1 repository of common libraries and utilities for the Guzek UK Website. ",
   "author": "Konrad Guzek",
   "homepage": "https://github.com/kguzek/guzek-uk-common#readme",
@@ -49,6 +49,7 @@
     "ip-address": "^10.0.1",
     "jsonwebtoken": "^9.0.2",
     "jwks-rsa": "^3.1.0",
+    "method-override": "^3.0.0",
     "mysql2": "^3.11.5",
     "sequelize": "^6.37.5",
     "sequelize-typescript": "^2.1.6",
@@ -60,6 +61,7 @@
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/jsonwebtoken": "^9.0.7",
+    "@types/method-override": "^3.0.0",
     "@types/node": "^22.10.2",
     "@types/sequelize": "^4.28.20",
     "typescript": "^5.7.2"
