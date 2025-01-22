@@ -9,10 +9,11 @@
     "node": "^22.3.0"
   },
   "scripts": {
-    "clean": "rm -r dist guzek-uk-common-*.tgz",
+    "clean": "rm -rf dist guzek-uk-common-*.tgz",
     "build": "npm i; npm run clean; tsc && npm pack",
     "release": "npm publish --access public",
-    "deploy": "npm run build && npm run release && npm i"
+    "bump": "for i in ../guzek-uk-{api,*-server}; do cd $i; npm run up; git add package-lock.json; git commit -m 'bump guzek-uk-common'; git push; done",
+    "deploy": "npm run build && npm run release && npm run bump"
   },
   "repository": {
     "type": "git",
