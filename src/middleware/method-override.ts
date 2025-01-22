@@ -14,6 +14,8 @@ export const useMethodOverride = methodOverride(
       logger.warn("Invalid HTTP method override", method);
       return "POST";
     }
+    delete req.query._method;
+    delete req.body._method;
     logger.http(`Request method override is ${method}`);
     return method;
   },
