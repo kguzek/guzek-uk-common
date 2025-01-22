@@ -1,5 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 import { getLogger } from "../lib/logger";
+import { getRequestIp } from "../lib/http";
+import type { CustomResponse } from "../models";
 
 const logger = getLogger(__filename);
 
@@ -12,9 +14,6 @@ const SENSITIVE_FIELDS = [
   "refreshToken",
 ];
 
-const getRequestIP = (req: Request) =>
-  req.headers["x-forwarded-for"] || req.socket.remoteAddress || null;
-
 export async function loggingMiddleware(
   req: Request,
   res: Response,
@@ -26,8 +25,9 @@ export async function loggingMiddleware(
     if (!body[sensitiveField]) continue;
     body[sensitiveField] = "********";
   }
-  const ip = getRequestIP(req);
-  (res as any).ip = ip;
+  const ip = getRequestIp(req);
+  // Needed to log the IP address during response
+  (res as CustomResponse).ip = ip;
   const path = req.originalUrl.replace(/token=[^&]+/, "token=********");
   logger.request(`${req.method} ${path}`, { ip, body });
   next();

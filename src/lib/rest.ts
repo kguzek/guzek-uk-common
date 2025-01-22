@@ -65,8 +65,9 @@ export async function readAllDatabaseEntries<T extends Model>(
   }
 }
 
-const isErrorCallback = (onError: any): onError is (error: Error) => void =>
-  typeof onError === "function";
+const isErrorCallback = (
+  onError?: OnError
+): onError is (error: Error) => void => typeof onError === "function";
 
 type OnError = ((error: Error) => void) | Response;
 

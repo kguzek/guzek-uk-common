@@ -3,13 +3,22 @@ import type { Request, Response } from "express";
 import { STATIC_CACHE_DURATION_MINS } from "../enums";
 import { getStatusText, getVideoExtension, setCacheControl } from "./util";
 import { getLogger } from "./logger";
-import type { StatusCode } from "../models";
+import type { CustomResponse, StatusCode } from "../models";
+import { Address4 as ipv4 } from "ip-address";
 
 const logger = getLogger(__filename);
 
+/** An array of IP addresses with subnets which correspond to private networks. */
+const LOCAL_ADDRESS_SUBNETS = [
+  "127.0.0.0/8",
+  "192.168.0.0/24",
+  "10.0.0.0/8",
+  "172.16.0.0/12",
+].map((subnet) => new ipv4(subnet));
+
 export const logResponse = (res: Response, message: string) =>
   logger.response(message, {
-    ip: (res as any).ip,
+    ip: (res as CustomResponse).ip,
   });
 
 /** Sends the response with a 2xx status and JSON body containing the given data object.
@@ -123,4 +132,30 @@ export async function sendFileStream(
   res.writeHead(responseCode, headers);
   file.pipe(res);
   logResponse(res, getStatusText(responseCode));
+}
+
+/** Extracts the request's originating IP address, taking into account proxies. */
+export function getRequestIp(req: Request) {
+  const ip =
+    req.headers["x-forwarded-for"] || req.socket.remoteAddress || req.ip;
+  if (!ip) return null;
+  if (Array.isArray(ip)) return ip[0];
+  return ip;
+}
+
+/** Determines whether the request originated from a local network. */
+export function isLanRequest(request: Request) {
+  const ipAddressString = getRequestIp(request);
+  if (ipAddressString == null) {
+    console.warn("Could not determine request IP address.");
+    return false;
+  }
+  let ipAddress;
+  try {
+    ipAddress = new ipv4(ipAddressString);
+  } catch (error) {
+    console.warn("Could not parse address as IPv4:", error);
+    return false;
+  }
+  return LOCAL_ADDRESS_SUBNETS.some((subnet) => ipAddress.isInSubnet(subnet));
 }

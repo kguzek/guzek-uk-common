@@ -1,4 +1,4 @@
-import type { Request } from "express";
+import type { Request, Response } from "express";
 import { convertTorrentInfo } from "./lib/util";
 import {
   CLIENT_ERROR_STATUS_CODES,
@@ -52,6 +52,10 @@ export interface UserObj {
 
 export interface CustomRequest extends Request {
   user?: UserObj;
+}
+
+export interface CustomResponse extends Response {
+  ip: string | null;
 }
 
 export interface TorrentInfo {
