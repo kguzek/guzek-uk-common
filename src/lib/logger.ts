@@ -133,7 +133,7 @@ const errorFileTransport = new transports.File({
 const debugMode = process.env.NODE_ENV === "development";
 
 const baseLogger = createLogger({
-  level: debugMode ? "debug" : "info",
+  level: debugMode ? "debug" : "http",
   levels: LOG_LEVELS,
   format: format.combine(
     format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
