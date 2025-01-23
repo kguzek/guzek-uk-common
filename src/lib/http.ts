@@ -21,7 +21,7 @@ export const logResponse = (res: Response, message: string) =>
     ip: (res as CustomResponse).ip,
   });
 
-/** If the request doesn't accept JSON, sends a redirect response relative to the request's origin, or `HTTP 406` if the origin isn't set.
+/** If the request accepts text/html, sends a redirect response relative to the request's origin, or `HTTP 406` if the origin isn't set.
  *
  * @param req The request object to check for JSON acceptance. If not provided, the function is a no-op.
  * @param res The response object to send the redirect response.
@@ -29,8 +29,8 @@ export const logResponse = (res: Response, message: string) =>
  *
  * @returns a boolean indicating whether a response was sent.
  */
-function requestRefusesJson(res: Response, req?: Request, path?: string) {
-  if (req == null || !path || req.accepts("json")) return false;
+function requestAcceptsHtml(res: Response, req?: Request, path?: string) {
+  if (req == null || !path || !req.accepts("html")) return false;
   if (req.headers.origin) {
     res.redirect(`${req.headers.origin}${path}`);
   } else {
@@ -61,7 +61,7 @@ export function sendOK(
   req?: Request,
   redirect?: string
 ) {
-  if (requestRefusesJson(res, req, redirect)) return;
+  if (requestAcceptsHtml(res, req, redirect)) return;
 
   if (data) {
     res.status(code).json(data);
@@ -85,7 +85,7 @@ export function sendError(
 ) {
   const statusText = getStatusText(code);
   const message = typeof error === "string" ? error : error.message;
-  if (requestRefusesJson(res, req, `/error/${code}/${message}`)) return;
+  if (requestAcceptsHtml(res, req, `/error/${code}/${message}`)) return;
   const jsonRes = { [statusText]: message };
   logResponse(res, `${statusText}: ${message}`);
   res.status(code).json(jsonRes);
