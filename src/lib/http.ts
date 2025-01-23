@@ -85,7 +85,7 @@ export function sendError(
 ) {
   const statusText = getStatusText(code);
   const message = typeof error === "string" ? error : error.message;
-  if (requestAcceptsHtml(res, req, `/error/${code}/${message}`)) return;
+  if (requestAcceptsHtml(res, req, `/error/${code}?message=${message}`)) return;
   const jsonRes = { [statusText]: message };
   logResponse(res, `${statusText}: ${message}`);
   res.status(code).json(jsonRes);
