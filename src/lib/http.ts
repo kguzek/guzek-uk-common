@@ -21,12 +21,48 @@ export const logResponse = (res: Response, message: string) =>
     ip: (res as CustomResponse).ip,
   });
 
+/** If the request doesn't accept JSON, sends a redirect response relative to the request's origin, or `HTTP 406` if the origin isn't set.
+ *
+ * @param req The request object to check for JSON acceptance. If not provided, the function is a no-op.
+ * @param res The response object to send the redirect response.
+ * @param path The relative path to redirect to if the request does not accept JSON.
+ *
+ * @returns a boolean indicating whether a response was sent.
+ */
+function requestRefusesJson(res: Response, req?: Request, path?: string) {
+  if (req == null || !path || req.accepts("json")) return false;
+  if (req.headers.origin) {
+    res.redirect(`${req.headers.origin}${path}`);
+  } else {
+    sendError(
+      res,
+      406,
+      "Requests without an origin header must only accept responses of content type `application/json`."
+    );
+  }
+  return true;
+}
+
 /** Sends the response with a 2xx status and JSON body containing the given data object.
  *
- *  @example sendOK(res, { message: "Success" }) => res.status(200).json({ message: "Success" })
- *  @example sendOK(res) => res.status(204).send()
+ * @param res The request's corresponding response object.
+ * @param data The data to be sent in the response body, if any.
+ * @param code The status code to be sent in the response (default 200).
+ * @param req The request object to check for JSON acceptance. If set, will redirect to the given URL if JSON is not accepted.
+ * @param redirect The relative path to redirect to if the request does not accept JSON.
+ *
+ * @example sendOK(res, { message: "Success" }) => res.status(200).json({ message: "Success" })
+ * @example sendOK(res) => res.status(204).send()
  */
-export function sendOK(res: Response, data?: any, code: StatusCode = 200) {
+export function sendOK(
+  res: Response,
+  data?: any,
+  code: StatusCode = 200,
+  req?: Request,
+  redirect?: string
+) {
+  if (requestRefusesJson(res, req, redirect)) return;
+
   if (data) {
     res.status(code).json(data);
   } else {
@@ -44,10 +80,12 @@ export function sendOK(res: Response, data?: any, code: StatusCode = 200) {
 export function sendError(
   res: Response,
   code: StatusCode,
-  error: string | { message: string } = { message: "Unknown error." }
+  error: string | { message: string } = { message: "Unknown error." },
+  req?: Request
 ) {
   const statusText = getStatusText(code);
   const message = typeof error === "string" ? error : error.message;
+  if (requestRefusesJson(res, req, `/error/${code}/${message}`)) return;
   const jsonRes = { [statusText]: message };
   logResponse(res, `${statusText}: ${message}`);
   res.status(code).json(jsonRes);

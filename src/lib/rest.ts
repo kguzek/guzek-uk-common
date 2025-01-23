@@ -119,14 +119,15 @@ export const findUnique = <T extends Model>(
 ) => (primaryKey ? model.findByPk(primaryKey) : null);
 
 /** Updates the entry with the request payload in the database table model derivative provided.
- *  Sends back a response containing the number of affected rows.
+ *  Sends back a response containing the number of affected rows, or a redirect if `redirect` is a relative path.
  */
 export async function updateDatabaseEntry<T extends Model>(
   model: ModelStatic<T>,
   req: Request,
   res: Response,
   modelParams?: Record<string, any>,
-  where?: WhereOptions
+  where?: WhereOptions,
+  redirect?: string
 ) {
   let result: [affectedCount: number];
   where ??= req.params;
@@ -142,16 +143,17 @@ export async function updateDatabaseEntry<T extends Model>(
   }
   const affectedRows = result[0];
   await updateEndpoint(model);
-  return sendOK(res, { affectedRows });
+  return sendOK(res, { affectedRows }, 200, req, redirect);
 }
 
 /** Deletes the specified entry from the database table model derivative provided.
- *  Sends back a response containing the number of destroyed rows.
+ *  Sends back a response containing the number of destroyed rows, or a redirect if `req` is provided and `redirect` is a relative path.
  */
 export async function deleteDatabaseEntry<T extends Model>(
   model: ModelStatic<T>,
   where: WhereOptions,
-  res?: Response
+  res?: Response,
+  ...[req, redirect]: [Request, string] | []
 ) {
   let destroyedRows: number;
   try {
@@ -162,7 +164,7 @@ export async function deleteDatabaseEntry<T extends Model>(
   }
   await updateEndpoint(model);
   if (res) {
-    sendOK(res, { destroyedRows });
+    sendOK(res, { destroyedRows }, 200, req, redirect);
   }
   return destroyedRows;
 }

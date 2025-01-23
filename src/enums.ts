@@ -46,6 +46,7 @@ export const CLIENT_ERROR_STATUS_CODES = {
   403: "Forbidden",
   404: "Not Found",
   405: "Method Not Allowed",
+  406: "Not Acceptable",
   409: "Conflict",
   429: "Too Many Requests",
 } as const;
