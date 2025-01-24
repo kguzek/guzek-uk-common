@@ -48,6 +48,7 @@ export interface UserObj {
   username: string;
   email: string;
   admin?: boolean;
+  serverUrl?: string;
 }
 
 export interface CustomRequest extends Request {
