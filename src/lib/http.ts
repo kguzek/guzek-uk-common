@@ -175,10 +175,10 @@ export async function sendFileStream(
 /** Extracts the request's originating IP address, taking into account proxies. */
 export function getRequestIp(req: Request) {
   const ip =
-    req.headers["x-forwarded-for"] || req.socket.remoteAddress || req.ip;
+    req.ip || req.socket.remoteAddress || req.headers["x-forwarded-for"];
   if (!ip) return null;
   if (Array.isArray(ip)) return ip[0];
-  return ip;
+  return ip.split(",")[0].trim();
 }
 
 /** Determines whether the request originated from a local network. */
