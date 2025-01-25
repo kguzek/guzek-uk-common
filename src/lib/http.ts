@@ -4,7 +4,7 @@ import { STATIC_CACHE_DURATION_MINS } from "../enums";
 import { getStatusText, getVideoExtension, setCacheControl } from "./util";
 import { getLogger } from "./logger";
 import type { CustomResponse, StatusCode } from "../models";
-import { Address4 as ipv4 } from "ip-address";
+import { Address4 as ipv4, Address6 as ipv6 } from "ip-address";
 
 const logger = getLogger(__filename);
 
@@ -185,15 +185,22 @@ export function getRequestIp(req: Request) {
 export function isLanRequest(request: Request) {
   const ipAddressString = getRequestIp(request);
   if (ipAddressString == null) {
-    console.warn("Could not determine request IP address.");
+    logger.warn("Could not determine request IP address.");
     return false;
   }
   let ipAddress;
   try {
     ipAddress = new ipv4(ipAddressString);
-  } catch (error) {
-    console.warn("Could not parse address as IPv4:", error);
-    return false;
+  } catch (error4) {
+    try {
+      ipAddress = new ipv6(ipAddressString);
+    } catch (error6) {
+      logger.warn(
+        `Could not parse address ${ipAddressString} as either IPv4 or IPv6:`,
+        { error4, error6 }
+      );
+      return false;
+    }
   }
   return LOCAL_ADDRESS_SUBNETS.some((subnet) => ipAddress.isInSubnet(subnet));
 }
