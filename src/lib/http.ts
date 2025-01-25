@@ -175,7 +175,7 @@ export async function sendFileStream(
 /** Extracts the request's originating IP address, taking into account proxies. */
 export function getRequestIp(req: Request) {
   const ip =
-    req.ip || req.socket.remoteAddress || req.headers["x-forwarded-for"];
+    req.headers["x-forwarded-for"] || req.socket.remoteAddress || req.ip;
   if (!ip) return null;
   if (Array.isArray(ip)) return ip[0];
   return ip.split(",")[0].trim();
