@@ -39,6 +39,8 @@ export class Page extends Model {
   titleEn!: string;
   @NotNull()
   titlePl!: string;
+  labelEn!: string;
+  labelPl!: string;
   @NotNull()
   url!: string;
   @NotNull()

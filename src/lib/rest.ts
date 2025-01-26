@@ -20,29 +20,35 @@ const isResponse = (res: any): res is Response =>
 
 /** Creates a new database entry in the database table model derivative provided.
  *  Sends a response containing the created data, unless `sendMethod` is specified.
- *  Returns `true` if the operation succeeded, else `false` if a 500 response was sent.
+ *  @returns `true` if the operation succeeded, else `false` if a 400 or 500 response was sent.
  */
 export async function createDatabaseEntry<T extends Model>(
   model: ModelStatic<T>,
   modelParams: MakeNullishOptional<InferCreationAttributes<T>>,
   res?: Response,
-  sendMethod?: (resp: Response, data: any, code: number) => void
+  sendMethod?: (resp: Response, data: any, code: number) => void,
+  ...[req, redirect]: [Request, string] | []
 ) {
   let obj;
   try {
     obj = await model.create(modelParams);
   } catch (error) {
-    if ((error as Error).name === "SequelizeUniqueConstraintError")
-      if (res)
-        sendError(res, 400, {
-          message: "Cannot create duplicate entries.",
-        });
     logger.error("Error while creating database entry:", error);
-    if (res) sendError(res, 500, error as Error);
+    if (res == null) return false;
+    if (
+      error instanceof Error &&
+      error.name === "SequelizeUniqueConstraintError"
+    ) {
+      sendError(res, 400, {
+        message: "Cannot create duplicate entries.",
+      });
+    } else {
+      sendError(res, 500, error as Error);
+    }
     return false;
   }
   await updateEndpoint(model);
-  if (res) (sendMethod ?? sendOK)(res, obj, 201);
+  if (res) (sendMethod ?? sendOK)(res, obj, 201, req, redirect);
   return true;
 }
 
