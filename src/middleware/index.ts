@@ -5,7 +5,7 @@ import { auth } from "./auth";
 import { headerMiddleware } from "./headers";
 import { loggingMiddleware } from "./logging";
 import { useCors } from "./cors";
-import { rateLimiterMiddleware } from "./rateLimiter";
+import { rateLimiterMiddleware } from "./rate-limiter";
 import { useMethodOverride } from "./method-override";
 
 export const getMiddleware = (debugMode: boolean): RequestHandler[] => [
