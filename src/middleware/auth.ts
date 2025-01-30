@@ -15,19 +15,17 @@ const logger = getLogger(__filename);
 // If false, allows requests with expired access tokens to go through
 const VERIFY_TOKEN_EXPIRY = true;
 
-enum AccessLevel {
-  anonymous = "anonymous",
-  authenticatedUser = "authenticatedUser",
-}
+type AccessLevel = "anonymous" | "authenticatedUser" | "cronUser";
 
 const INITIAL_ACCESS_MAP: Record<AccessLevel, boolean> = {
   anonymous: false,
   authenticatedUser: false,
+  cronUser: false,
 };
 
 const PERMISSIONS: [AccessLevel, Record<RequestMethod, string[]>][] = [
   [
-    AccessLevel.anonymous,
+    "anonymous",
     {
       GET: [
         "/pages", // View all pages
@@ -52,7 +50,7 @@ const PERMISSIONS: [AccessLevel, Record<RequestMethod, string[]>][] = [
     },
   ],
   [
-    AccessLevel.authenticatedUser,
+    "authenticatedUser",
     {
       GET: [
         "/tu-lalem", // View all app coordinates
@@ -77,7 +75,24 @@ const PERMISSIONS: [AccessLevel, Record<RequestMethod, string[]>][] = [
       ],
     },
   ],
-] as const;
+  [
+    "cronUser",
+    {
+      GET: [],
+      POST: [
+        "/liveseries/downloaded-episodes", // Download unwatched episode
+      ],
+      PUT: [],
+      DELETE: [],
+      PATCH: [],
+    },
+  ],
+];
+
+// Hardcoded for security reasons
+const CRON_USER_UUID = "a5260d6a-7275-4d86-bcd7-fd5372827ff5";
+
+const isCronUser = (user: UserObj | null) => user?.uuid === CRON_USER_UUID;
 
 export function auth(debugMode: boolean) {
   // Allows all requests to go through, even if JWT authentication fails.
@@ -170,6 +185,9 @@ export function auth(debugMode: boolean) {
         if (["GET", "PUT", "PATCH"].includes(req.method)) {
           return void next();
         }
+      }
+      if (endpointAccessibleBy.cronUser && isCronUser(req.user)) {
+        return void next();
       }
       reject(403, "You cannot perform that action.");
     });
