@@ -1,8 +1,10 @@
+import express from "express";
 import type { Application, Request, Response } from "express";
 import { getLogger } from "./logger";
 import { sendError } from "./http";
 import { router as healthcheckRouter } from "../routes/health";
 import { router as logRouter } from "../routes/logs";
+import path from "path";
 
 const logger = getLogger(__filename);
 
@@ -45,6 +47,7 @@ export function startServer(app: Application) {
 
   app.use("/health", healthcheckRouter, send405);
   app.use("/logs", logRouter, send405);
+  app.use(express.static(path.join(__dirname, "..", "public")));
 
   // Catch-all 404 response for any other route
   app.all("*", (req, res) =>

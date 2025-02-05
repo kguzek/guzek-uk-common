@@ -1,6 +1,6 @@
 {
   "name": "guzek-uk-common",
-  "version": "3.5.1",
+  "version": "3.5.2",
   "description": "A repository of common libraries and utilities for the Guzek UK Website. ",
   "author": "Konrad Guzek",
   "homepage": "https://github.com/kguzek/guzek-uk-common#readme",
@@ -10,7 +10,8 @@
   },
   "scripts": {
     "clean": "rm -rf dist guzek-uk-common-*.tgz",
-    "build": "npm i; npm run clean; tsc && npm pack",
+    "compile": "tsc && cp -r src/public dist/",
+    "build": "npm i; npm run clean; npm run compile && npm pack",
     "release": "npm publish --access public",
     "bump": "for i in ../guzek-uk-{api,*-server}; do cd $i; npm run up; git add package-lock.json; git commit -m 'bump guzek-uk-common'; git push; done",
     "deploy": "npm run build && npm run release && npm run bump"
