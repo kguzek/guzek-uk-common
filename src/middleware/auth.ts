@@ -37,6 +37,7 @@ const PERMISSIONS: [AccessLevel, Record<RequestMethod, string[]>][] = [
         "/torrents", // Search for torrents using scraper
         "/.well-known", // JWKS for JWT
         "/health", // Health check
+        "/favicon.ico", // Favicon
       ],
       POST: [
         "/auth/users", // Sign up
@@ -183,7 +184,7 @@ export function auth(debugMode: boolean) {
       if (!aud) {
         return reject(401, "Access token does not specify intended audience.");
       }
-      const url = `${req.protocol}://${req.host}/`;
+      const url = `${req.protocol}://${req.headers.host}/`;
       const isValidAudience = (audience: string) =>
         [url, "*"].includes(audience);
       if (
