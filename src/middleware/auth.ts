@@ -180,8 +180,15 @@ export function auth(debugMode: boolean) {
         logger.warn(`Invalid access token issuer: '${iss}'`);
         return reject(401, `Invalid access token issuer: '${iss}'`);
       }
+      if (!aud) {
+        return reject(401, "Access token does not specify intended audience.");
+      }
       const url = `${req.protocol}://${req.host}/`;
-      if (aud && aud !== url) {
+      const isValidAudience = (audience: string) =>
+        [url, "*"].includes(audience);
+      if (
+        Array.isArray(aud) ? !aud.some(isValidAudience) : !isValidAudience(aud)
+      ) {
         logger.warn(`Token intended for '${aud}' used on '${url}'`);
         return reject(401, `This access token is only valid for: '${aud}'`);
       }
