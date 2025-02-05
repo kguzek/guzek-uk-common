@@ -14,6 +14,7 @@ const logger = getLogger(__filename);
 
 // If false, allows requests with expired access tokens to go through
 const VERIFY_TOKEN_EXPIRY = true;
+const PRODUCTION_AUTH_SERVER_URL = "https://auth.guzek.uk";
 
 type AccessLevel = "anonymous" | "authenticatedUser" | "cronUser";
 
@@ -109,7 +110,7 @@ export function auth(debugMode: boolean) {
 
   const AUTH_SERVER_URL = USE_LOCAL_AUTH_URL
     ? "http://localhost:5019"
-    : "https://auth.guzek.uk";
+    : PRODUCTION_AUTH_SERVER_URL;
   const jwksClient = new JwksClient({
     jwksUri: AUTH_SERVER_URL + "/.well-known/jwks.json",
   });
@@ -169,13 +170,20 @@ export function auth(debugMode: boolean) {
         logger.error("Error verifying token:", err);
         return reject(401, "Invalid authorisation token.");
       }
-      const { iat, exp, ...userDetails } = user as UserObj & {
-        iat: number;
-        exp: number;
-      };
+      const { iat, exp, aud, iss, ...userDetails } = user as UserObj &
+        jwt.JwtPayload;
       req.user = userDetails;
-      if (VERIFY_TOKEN_EXPIRY && new Date().getTime() > exp) {
+      if (VERIFY_TOKEN_EXPIRY && new Date().getTime() > (exp ?? 0)) {
         return reject(401, "Access token is expired.");
+      }
+      if (iss !== PRODUCTION_AUTH_SERVER_URL) {
+        logger.warn(`Invalid access token issuer: '${iss}'`);
+        return reject(401, `Invalid access token issuer: '${iss}'`);
+      }
+      const url = `${req.protocol}://${req.host}/`;
+      if (aud && aud !== url) {
+        logger.warn(`Token intended for '${aud}' used on '${url}'`);
+        return reject(401, `This access token is only valid for: '${aud}'`);
       }
       if (endpointAccessibleBy.authenticatedUser || req.user?.admin) {
         return void next();
