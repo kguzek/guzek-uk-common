@@ -193,7 +193,7 @@ export function auth(debugMode: boolean) {
         logger.warn(`Token intended for '${aud}' used on '${url}'`);
         return reject(401, `This access token is only valid for: '${aud}'`);
       }
-      if (endpointAccessibleBy.authenticatedUser || req.user?.admin) {
+      if (endpointAccessibleBy.authenticatedUser) {
         return void next();
       }
       // Allow user to edit own details
@@ -205,7 +205,13 @@ export function auth(debugMode: boolean) {
       if (endpointAccessibleBy.cronUser && isCronUser(req.user)) {
         return void next();
       }
-      reject(403, "You cannot perform that action.");
+      if (req.user?.admin) {
+        logger.debug(
+          `Allowing admin ${req.user.username} to ${req.method} ${req.path} which would otherwise be forbidden.`
+        );
+        return void next();
+      }
+      return reject(403, "You cannot perform that action.");
     });
   };
 }
