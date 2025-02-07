@@ -64,10 +64,10 @@ const PERMISSIONS: [AccessLevel, Record<RequestMethod, string[]>][] = [
       POST: [
         "/tu-lalem", // Submit app coordinates
         "/liveseries/shows/personal", // Add show to liked/subscribed list
+        "/liveseries/downloaded-episodes", // Download unwatched episode
       ],
       PUT: [
         "/liveseries/watched-episodes/personal", // Modify own watched episodes
-        "/liveseries/downloaded-episodes", // Download unwatched episode
         "/auth/users/me", // Modify own user details
       ],
       DELETE: [
