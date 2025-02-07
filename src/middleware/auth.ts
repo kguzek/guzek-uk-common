@@ -16,12 +16,12 @@ const logger = getLogger(__filename);
 const VERIFY_TOKEN_EXPIRY = true;
 const PRODUCTION_AUTH_SERVER_URL = "https://auth.guzek.uk";
 
-type AccessLevel = "anonymous" | "authenticatedUser" | "cronUser";
+type AccessLevel = "anonymous" | "authenticatedUser" /* | "cronUser"*/;
 
 const INITIAL_ACCESS_MAP: Record<AccessLevel, boolean> = {
   anonymous: false,
   authenticatedUser: false,
-  cronUser: false,
+  // cronUser: false,
 };
 
 const PERMISSIONS: [AccessLevel, Record<RequestMethod, string[]>][] = [
@@ -67,6 +67,7 @@ const PERMISSIONS: [AccessLevel, Record<RequestMethod, string[]>][] = [
       ],
       PUT: [
         "/liveseries/watched-episodes/personal", // Modify own watched episodes
+        "/liveseries/downloaded-episodes", // Download unwatched episode
         "/auth/users/me", // Modify own user details
       ],
       DELETE: [
@@ -77,24 +78,12 @@ const PERMISSIONS: [AccessLevel, Record<RequestMethod, string[]>][] = [
       ],
     },
   ],
-  [
-    "cronUser",
-    {
-      GET: [],
-      POST: [
-        "/liveseries/downloaded-episodes", // Download unwatched episode
-      ],
-      PUT: [],
-      DELETE: [],
-      PATCH: [],
-    },
-  ],
 ];
 
 // Hardcoded for security reasons
-const CRON_USER_UUID = "a5260d6a-7275-4d86-bcd7-fd5372827ff5";
+// const CRON_USER_UUID = "a5260d6a-7275-4d86-bcd7-fd5372827ff5";
 
-const isCronUser = (user: UserObj | null) => user?.uuid === CRON_USER_UUID;
+// const isCronUser = (user: UserObj | null) => user?.uuid === CRON_USER_UUID;
 
 export function auth(debugMode: boolean) {
   // Allows all requests to go through, even if JWT authentication fails.
@@ -202,9 +191,9 @@ export function auth(debugMode: boolean) {
           return void next();
         }
       }
-      if (endpointAccessibleBy.cronUser && isCronUser(req.user)) {
-        return void next();
-      }
+      // if (endpointAccessibleBy.cronUser && isCronUser(req.user)) {
+      //   return void next();
+      // }
       if (req.user?.admin) {
         logger.debug(
           `Allowing admin ${req.user.username} to ${req.method} ${req.path} which would otherwise be forbidden.`
