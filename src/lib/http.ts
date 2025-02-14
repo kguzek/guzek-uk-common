@@ -94,7 +94,8 @@ export function sendError(
 export async function sendFileStream(
   req: Request,
   res: Response,
-  path: string
+  path: string,
+  FILE_EXTENSION_OVERRIDE?: "mp4"
 ) {
   let filename = path;
   let fileExtension = getVideoExtension(filename);
@@ -121,13 +122,17 @@ export async function sendFileStream(
     return;
   }
 
-  if (fileExtension !== "mp4") {
-    filename += ".mp4";
+  if (
+    FILE_EXTENSION_OVERRIDE != null &&
+    fileExtension !== FILE_EXTENSION_OVERRIDE
+  ) {
+    fileExtension = FILE_EXTENSION_OVERRIDE;
+    filename += `.${FILE_EXTENSION_OVERRIDE}`;
     try {
       await fs.access(filename);
     } catch {
       sendError(res, 429, {
-        message: `The file has not yet been converted to MP4. Check back later.`,
+        message: `The file has not yet been converted to ${fileExtension.toUpperCase()}. Check back later.`,
       });
       return;
     }
@@ -145,7 +150,7 @@ export async function sendFileStream(
   let file;
 
   const headers: Record<string, string | number> = {
-    "Content-Type": "video/mp4",
+    "Content-Type": `video/${fileExtension}`,
   };
   if (range) {
     const match = range.match(/bytes=(\d+)-(\d*)/);

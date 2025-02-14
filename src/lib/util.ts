@@ -79,6 +79,7 @@ export function validateNaturalList(list: any, res: Response) {
   return list as number[];
 }
 
+/** Returns mkv, mp4 or avi if the input filename ends with either of those, or undefined. */
 export const getVideoExtension = (filename: string) =>
   filename.match(/\.(mkv|mp4|avi)$/)?.[1];
 
