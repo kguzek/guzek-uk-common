@@ -130,17 +130,15 @@ const errorFileTransport = new transports.File({
   format: jsonFormat,
 });
 
-const debugMode = process.env.NODE_ENV === "development";
-
 const baseLogger = createLogger({
-  level: process.env.LOG_LEVEL || (debugMode ? "debug" : "http"),
+  level: "debug",
   levels: LOG_LEVELS,
   format: format.combine(
     format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
     // Format the metadata object
     format.metadata({
       fillExcept: ["message", "level", "timestamp", "label"],
-    })
+    }),
   ),
   transports: [defaultFileTransport, errorFileTransport],
 }) as CustomLogger;
@@ -160,6 +158,8 @@ export function getLogger(filename: string) {
   const label = path.basename(filename);
   const logger = baseLogger.child({ filename: label });
 
+  const debugMode = process.env.NODE_ENV === "development";
+
   const useConsoleTransport =
     debugMode || process.env.LOG_TO_CONSOLE === "true";
 
@@ -168,7 +168,8 @@ export function getLogger(filename: string) {
     logger.add(
       new transports.Console({
         format: format.combine(logFormat),
-      })
+        level: process.env.LOG_LEVEL || (debugMode ? "debug" : "http"),
+      }),
     );
   }
   return logger;
