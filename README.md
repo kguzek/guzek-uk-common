@@ -1,11 +1,17 @@
 # Guzek UK Common
 
+## DEPRECATION NOTICE 2025-07-03
+
+Guzek UK Common was made obsolete with the [integration of PayloadCMS](https://github.com/kguzek/guzek-uk-website/pull/18) into the Guzek UK website. This repository no longer serves any use.
+
+## Intro
+
 A repository of common modules and utilities for the Guzek UK Website, used on the various deployed servers.
 The functionality of these utilities is based around a REST HTTP server, with a heavy focus on CRUD operations.
 
 ## Installation
 
-The package is published at the NPM package registry.
+The package is published on the NPM package registry.
 
 ```bash
 npm install guzek-uk-common
@@ -20,7 +26,7 @@ Below is a list of all modules available in this library.
 Used for obtaining a logger instance. Usage:
 
 ```ts
-import { getLogger } from "guzek-uk-commons/logger";
+import { getLogger } from "guzek-uk-common/logger";
 const logger = getLogger(__filename);
 
 logger.info("Hello, world!");
@@ -48,7 +54,7 @@ Exports an array factory containing middlewares which should be used on all serv
 
 ```ts
 import express from "express";
-import { getMiddleware } from "guzek-uk-commons/middleware";
+import { getMiddleware } from "guzek-uk-common/middleware";
 
 const app = express();
 app.use(getMiddleware());
